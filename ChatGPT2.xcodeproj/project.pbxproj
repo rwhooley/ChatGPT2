@@ -7,18 +7,72 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		E3AD61712C7FB547000FEC84 /* StripePaymentSheet in Frameworks */ = {isa = PBXBuildFile; productRef = E3AD61702C7FB547000FEC84 /* StripePaymentSheet */; };
+		E3AD61732C813A97000FEC84 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = E3AD61722C813A97000FEC84 /* GoogleService-Info.plist */; };
+		E3AD61752C821DBF000FEC84 /* DepositBankView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3AD61742C821DBF000FEC84 /* DepositBankView.swift */; };
+		E3AD61772C821F0A000FEC84 /* BankViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3AD61762C821F0A000FEC84 /* BankViewModel.swift */; };
+		E3AD617B2C82B78A000FEC84 /* SafariServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E3AD617A2C82B78A000FEC84 /* SafariServices.framework */; };
+		E3AD617D2C86530A000FEC84 /* SwiftUIView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3AD617C2C86530A000FEC84 /* SwiftUIView.swift */; };
 		E3C50E382C79413C00978B8F /* ChatGPT2App.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3C50E372C79413C00978B8F /* ChatGPT2App.swift */; };
 		E3C50E3A2C79413C00978B8F /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3C50E392C79413C00978B8F /* ContentView.swift */; };
 		E3C50E3C2C79413D00978B8F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E3C50E3B2C79413D00978B8F /* Assets.xcassets */; };
 		E3C50E3F2C79413D00978B8F /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E3C50E3E2C79413D00978B8F /* Preview Assets.xcassets */; };
+		E3C50E482C7BB24500978B8F /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3C50E472C7BB24500978B8F /* LoginView.swift */; };
+		E3C50E4A2C7BB38500978B8F /* RegisterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3C50E492C7BB38500978B8F /* RegisterView.swift */; };
+		E3C50E502C7BB59200978B8F /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = E3C50E4F2C7BB59200978B8F /* FirebaseAuth */; };
+		E3C50E522C7BB8D000978B8F /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = E3C50E512C7BB8D000978B8F /* FirebaseFirestore */; };
+		E3C50E542C7BBB3E00978B8F /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3C50E532C7BBB3E00978B8F /* HomeView.swift */; };
+		E3C50E562C7BBFA400978B8F /* BankView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3C50E552C7BBFA400978B8F /* BankView.swift */; };
+		E3C50E582C7BC01E00978B8F /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3C50E572C7BC01E00978B8F /* MainTabView.swift */; };
+		E3DBD0BC2C7E16B2000DEB20 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3DBD0BB2C7E16B2000DEB20 /* Extensions.swift */; };
+		E3E455CE2C7E9BE9007C1205 /* DetailedWorkout.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E455CD2C7E9BE9007C1205 /* DetailedWorkout.swift */; };
+		E3E8243F2C7BC439005DE715 /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E8243E2C7BC439005DE715 /* ProfileView.swift */; };
+		E3E824432C7BC714005DE715 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E824422C7BC714005DE715 /* User.swift */; };
+		E3E824452C7BC861005DE715 /* FirebaseFirestoreCombine-Community in Frameworks */ = {isa = PBXBuildFile; productRef = E3E824442C7BC861005DE715 /* FirebaseFirestoreCombine-Community */; };
+		E3E824492C7BCF41005DE715 /* HealthKitManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E824482C7BCF41005DE715 /* HealthKitManager.swift */; };
+		E3E8244B2C7BD89B005DE715 /* PerformanceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E8244A2C7BD89B005DE715 /* PerformanceView.swift */; };
+		E3E824532C7BFFAE005DE715 /* CommunityView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E824522C7BFFAE005DE715 /* CommunityView.swift */; };
+		E3E824572C7C03FE005DE715 /* WorkoutTypeSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E824562C7C03FE005DE715 /* WorkoutTypeSelectionView.swift */; };
+		E3E824592C7C043B005DE715 /* WorkoutManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E824582C7C043B005DE715 /* WorkoutManager.swift */; };
+		E3E8245B2C7C060D005DE715 /* WorkoutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E8245A2C7C060D005DE715 /* WorkoutView.swift */; };
+		E3E8245E2C7CBB5B005DE715 /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E8245D2C7CBB5B005DE715 /* AppState.swift */; };
+		E3E824602C7CF023005DE715 /* Stripe in Frameworks */ = {isa = PBXBuildFile; productRef = E3E8245F2C7CF023005DE715 /* Stripe */; };
+		E3E824622C7CF45D005DE715 /* FirebaseFunctions in Frameworks */ = {isa = PBXBuildFile; productRef = E3E824612C7CF45D005DE715 /* FirebaseFunctions */; };
+		E3E824652C7D1226005DE715 /* HealthKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E3E824632C7D1225005DE715 /* HealthKit.framework */; };
+		E3E824662C7D1226005DE715 /* HealthKitUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E3E824642C7D1225005DE715 /* HealthKitUI.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		E3AD61722C813A97000FEC84 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		E3AD61742C821DBF000FEC84 /* DepositBankView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DepositBankView.swift; sourceTree = "<group>"; };
+		E3AD61762C821F0A000FEC84 /* BankViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BankViewModel.swift; sourceTree = "<group>"; };
+		E3AD617A2C82B78A000FEC84 /* SafariServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SafariServices.framework; path = System/Library/Frameworks/SafariServices.framework; sourceTree = SDKROOT; };
+		E3AD617C2C86530A000FEC84 /* SwiftUIView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftUIView.swift; sourceTree = "<group>"; };
 		E3C50E342C79413C00978B8F /* ChatGPT2.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ChatGPT2.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E3C50E372C79413C00978B8F /* ChatGPT2App.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatGPT2App.swift; sourceTree = "<group>"; };
 		E3C50E392C79413C00978B8F /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		E3C50E3B2C79413D00978B8F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		E3C50E3E2C79413D00978B8F /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		E3C50E472C7BB24500978B8F /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
+		E3C50E492C7BB38500978B8F /* RegisterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegisterView.swift; sourceTree = "<group>"; };
+		E3C50E532C7BBB3E00978B8F /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
+		E3C50E552C7BBFA400978B8F /* BankView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BankView.swift; sourceTree = "<group>"; };
+		E3C50E572C7BC01E00978B8F /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
+		E3DBD0BB2C7E16B2000DEB20 /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
+		E3E455CD2C7E9BE9007C1205 /* DetailedWorkout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailedWorkout.swift; sourceTree = "<group>"; };
+		E3E8243E2C7BC439005DE715 /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
+		E3E824422C7BC714005DE715 /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
+		E3E824462C7BCD81005DE715 /* ChatGPT2.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ChatGPT2.entitlements; sourceTree = "<group>"; };
+		E3E824472C7BCE7E005DE715 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		E3E824482C7BCF41005DE715 /* HealthKitManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthKitManager.swift; sourceTree = "<group>"; };
+		E3E8244A2C7BD89B005DE715 /* PerformanceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PerformanceView.swift; sourceTree = "<group>"; };
+		E3E824522C7BFFAE005DE715 /* CommunityView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommunityView.swift; sourceTree = "<group>"; };
+		E3E824562C7C03FE005DE715 /* WorkoutTypeSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutTypeSelectionView.swift; sourceTree = "<group>"; };
+		E3E824582C7C043B005DE715 /* WorkoutManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutManager.swift; sourceTree = "<group>"; };
+		E3E8245A2C7C060D005DE715 /* WorkoutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutView.swift; sourceTree = "<group>"; };
+		E3E8245D2C7CBB5B005DE715 /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
+		E3E824632C7D1225005DE715 /* HealthKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = HealthKit.framework; path = System/Library/Frameworks/HealthKit.framework; sourceTree = SDKROOT; };
+		E3E824642C7D1225005DE715 /* HealthKitUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = HealthKitUI.framework; path = System/Library/Frameworks/HealthKitUI.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -26,6 +80,15 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E3AD61712C7FB547000FEC84 /* StripePaymentSheet in Frameworks */,
+				E3E824452C7BC861005DE715 /* FirebaseFirestoreCombine-Community in Frameworks */,
+				E3E824602C7CF023005DE715 /* Stripe in Frameworks */,
+				E3E824662C7D1226005DE715 /* HealthKitUI.framework in Frameworks */,
+				E3E824622C7CF45D005DE715 /* FirebaseFunctions in Frameworks */,
+				E3AD617B2C82B78A000FEC84 /* SafariServices.framework in Frameworks */,
+				E3E824652C7D1226005DE715 /* HealthKit.framework in Frameworks */,
+				E3C50E502C7BB59200978B8F /* FirebaseAuth in Frameworks */,
+				E3C50E522C7BB8D000978B8F /* FirebaseFirestore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -35,8 +98,11 @@
 		E3C50E2B2C79413C00978B8F = {
 			isa = PBXGroup;
 			children = (
+				E3C634772C7E97F000E5A8F5 /* Files */,
+				E3E824412C7BC6F8005DE715 /* Models */,
 				E3C50E362C79413C00978B8F /* ChatGPT2 */,
 				E3C50E352C79413C00978B8F /* Products */,
+				E3C50E4E2C7BB59200978B8F /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -51,8 +117,29 @@
 		E3C50E362C79413C00978B8F /* ChatGPT2 */ = {
 			isa = PBXGroup;
 			children = (
+				E3E824472C7BCE7E005DE715 /* Info.plist */,
+				E3E824462C7BCD81005DE715 /* ChatGPT2.entitlements */,
 				E3C50E372C79413C00978B8F /* ChatGPT2App.swift */,
 				E3C50E392C79413C00978B8F /* ContentView.swift */,
+				E3DBD0BB2C7E16B2000DEB20 /* Extensions.swift */,
+				E3E824482C7BCF41005DE715 /* HealthKitManager.swift */,
+				E3E8244A2C7BD89B005DE715 /* PerformanceView.swift */,
+				E3E8245D2C7CBB5B005DE715 /* AppState.swift */,
+				E3E455CD2C7E9BE9007C1205 /* DetailedWorkout.swift */,
+				E3C50E472C7BB24500978B8F /* LoginView.swift */,
+				E3E824562C7C03FE005DE715 /* WorkoutTypeSelectionView.swift */,
+				E3E824582C7C043B005DE715 /* WorkoutManager.swift */,
+				E3AD61742C821DBF000FEC84 /* DepositBankView.swift */,
+				E3C50E552C7BBFA400978B8F /* BankView.swift */,
+				E3AD61762C821F0A000FEC84 /* BankViewModel.swift */,
+				E3C50E492C7BB38500978B8F /* RegisterView.swift */,
+				E3E8245A2C7C060D005DE715 /* WorkoutView.swift */,
+				E3C50E532C7BBB3E00978B8F /* HomeView.swift */,
+				E3E8243E2C7BC439005DE715 /* ProfileView.swift */,
+				E3E824522C7BFFAE005DE715 /* CommunityView.swift */,
+				E3AD617C2C86530A000FEC84 /* SwiftUIView.swift */,
+				E3C50E572C7BC01E00978B8F /* MainTabView.swift */,
+				E3AD61722C813A97000FEC84 /* GoogleService-Info.plist */,
 				E3C50E3B2C79413D00978B8F /* Assets.xcassets */,
 				E3C50E3D2C79413D00978B8F /* Preview Content */,
 			);
@@ -65,6 +152,31 @@
 				E3C50E3E2C79413D00978B8F /* Preview Assets.xcassets */,
 			);
 			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		E3C50E4E2C7BB59200978B8F /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				E3AD617A2C82B78A000FEC84 /* SafariServices.framework */,
+				E3E824632C7D1225005DE715 /* HealthKit.framework */,
+				E3E824642C7D1225005DE715 /* HealthKitUI.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		E3C634772C7E97F000E5A8F5 /* Files */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Files;
+			sourceTree = "<group>";
+		};
+		E3E824412C7BC6F8005DE715 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				E3E824422C7BC714005DE715 /* User.swift */,
+			);
+			path = Models;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -83,6 +195,14 @@
 			dependencies = (
 			);
 			name = ChatGPT2;
+			packageProductDependencies = (
+				E3C50E4F2C7BB59200978B8F /* FirebaseAuth */,
+				E3C50E512C7BB8D000978B8F /* FirebaseFirestore */,
+				E3E824442C7BC861005DE715 /* FirebaseFirestoreCombine-Community */,
+				E3E8245F2C7CF023005DE715 /* Stripe */,
+				E3E824612C7CF45D005DE715 /* FirebaseFunctions */,
+				E3AD61702C7FB547000FEC84 /* StripePaymentSheet */,
+			);
 			productName = ChatGPT2;
 			productReference = E3C50E342C79413C00978B8F /* ChatGPT2.app */;
 			productType = "com.apple.product-type.application";
@@ -111,6 +231,10 @@
 				Base,
 			);
 			mainGroup = E3C50E2B2C79413C00978B8F;
+			packageReferences = (
+				E3C50E4B2C7BB4EA00978B8F /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+				E3E8245C2C7CAB0C005DE715 /* XCRemoteSwiftPackageReference "stripe-ios" */,
+			);
 			productRefGroup = E3C50E352C79413C00978B8F /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -127,6 +251,7 @@
 			files = (
 				E3C50E3F2C79413D00978B8F /* Preview Assets.xcassets in Resources */,
 				E3C50E3C2C79413D00978B8F /* Assets.xcassets in Resources */,
+				E3AD61732C813A97000FEC84 /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -137,7 +262,26 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E3E8243F2C7BC439005DE715 /* ProfileView.swift in Sources */,
+				E3E824592C7C043B005DE715 /* WorkoutManager.swift in Sources */,
+				E3E824572C7C03FE005DE715 /* WorkoutTypeSelectionView.swift in Sources */,
+				E3C50E562C7BBFA400978B8F /* BankView.swift in Sources */,
+				E3E8245B2C7C060D005DE715 /* WorkoutView.swift in Sources */,
+				E3E824532C7BFFAE005DE715 /* CommunityView.swift in Sources */,
+				E3C50E482C7BB24500978B8F /* LoginView.swift in Sources */,
+				E3C50E4A2C7BB38500978B8F /* RegisterView.swift in Sources */,
+				E3AD617D2C86530A000FEC84 /* SwiftUIView.swift in Sources */,
 				E3C50E3A2C79413C00978B8F /* ContentView.swift in Sources */,
+				E3E824432C7BC714005DE715 /* User.swift in Sources */,
+				E3AD61772C821F0A000FEC84 /* BankViewModel.swift in Sources */,
+				E3E455CE2C7E9BE9007C1205 /* DetailedWorkout.swift in Sources */,
+				E3E8244B2C7BD89B005DE715 /* PerformanceView.swift in Sources */,
+				E3E8245E2C7CBB5B005DE715 /* AppState.swift in Sources */,
+				E3AD61752C821DBF000FEC84 /* DepositBankView.swift in Sources */,
+				E3C50E582C7BC01E00978B8F /* MainTabView.swift in Sources */,
+				E3C50E542C7BBB3E00978B8F /* HomeView.swift in Sources */,
+				E3DBD0BC2C7E16B2000DEB20 /* Extensions.swift in Sources */,
+				E3E824492C7BCF41005DE715 /* HealthKitManager.swift in Sources */,
 				E3C50E382C79413C00978B8F /* ChatGPT2App.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -269,12 +413,16 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = ChatGPT2/ChatGPT2.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"ChatGPT2/Preview Content\"";
 				DEVELOPMENT_TEAM = VYYC62P8V5;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ChatGPT2/Info.plist;
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "This app requires access to your health data to track your workouts.";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "This app requires permission to save your workout data to HealthKit.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -285,7 +433,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.myorganization.ChatGPT2;
+				PRODUCT_BUNDLE_IDENTIFIER = com.antelopefitness.DemoApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -298,12 +446,16 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = ChatGPT2/ChatGPT2.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"ChatGPT2/Preview Content\"";
 				DEVELOPMENT_TEAM = VYYC62P8V5;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ChatGPT2/Info.plist;
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "This app requires access to your health data to track your workouts.";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "This app requires permission to save your workout data to HealthKit.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -314,7 +466,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.myorganization.ChatGPT2;
+				PRODUCT_BUNDLE_IDENTIFIER = com.antelopefitness.DemoApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -344,6 +496,58 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		E3C50E4B2C7BB4EA00978B8F /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 11.1.0;
+			};
+		};
+		E3E8245C2C7CAB0C005DE715 /* XCRemoteSwiftPackageReference "stripe-ios" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/stripe/stripe-ios";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 23.29.2;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		E3AD61702C7FB547000FEC84 /* StripePaymentSheet */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E3E8245C2C7CAB0C005DE715 /* XCRemoteSwiftPackageReference "stripe-ios" */;
+			productName = StripePaymentSheet;
+		};
+		E3C50E4F2C7BB59200978B8F /* FirebaseAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E3C50E4B2C7BB4EA00978B8F /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAuth;
+		};
+		E3C50E512C7BB8D000978B8F /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E3C50E4B2C7BB4EA00978B8F /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
+		};
+		E3E824442C7BC861005DE715 /* FirebaseFirestoreCombine-Community */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E3C50E4B2C7BB4EA00978B8F /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = "FirebaseFirestoreCombine-Community";
+		};
+		E3E8245F2C7CF023005DE715 /* Stripe */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E3E8245C2C7CAB0C005DE715 /* XCRemoteSwiftPackageReference "stripe-ios" */;
+			productName = Stripe;
+		};
+		E3E824612C7CF45D005DE715 /* FirebaseFunctions */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E3C50E4B2C7BB4EA00978B8F /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFunctions;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = E3C50E2C2C79413C00978B8F /* Project object */;
 }
