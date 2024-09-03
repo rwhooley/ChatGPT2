@@ -78,9 +78,9 @@ struct MainTabView: View {
         .sheet(isPresented: $showingProfile) {
             ProfileView()
         }
-        .onChange(of: selectedWorkoutType) { newValue in
-            if let workoutType = newValue {
-                workoutManager.startWorkout(workoutType: workoutType) // Start the workout with selected type
+        .onChange(of: selectedWorkoutType) {
+            if let workoutType = selectedWorkoutType {
+                workoutManager.startWorkout(workoutType: workoutType)
                 showingWorkout = true
             }
         }
@@ -116,6 +116,3 @@ struct MainTabView: View {
     MainTabView()
         .environmentObject(HealthKitManager())
 }
-
-
-
