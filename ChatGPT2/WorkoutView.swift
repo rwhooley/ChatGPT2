@@ -13,10 +13,11 @@ struct WorkoutView: View {
     @Binding var isPresented: Bool
     @State private var showingAlert = false
     @State private var alertMessage = ""
-    
+    @State private var workoutType: HKWorkoutActivityType? // Added state to hold workoutType locally
+
     var body: some View {
         VStack {
-            Text(workoutManager.workoutType.map { HKWorkoutActivityType.name(for: $0) } ?? "Workout")
+            Text(workoutType.map { HKWorkoutActivityType.name(for: $0) } ?? "Workout")
                 .font(.largeTitle)
             
             HStack {
@@ -53,7 +54,7 @@ struct WorkoutView: View {
     private func requestAuthorizationAndStartWorkout() {
         workoutManager.requestAuthorization { (success, error) in
             if success {
-                if let workoutType = workoutManager.workoutType {
+                if let workoutType = workoutType {
                     workoutManager.startWorkout(workoutType: workoutType)
                 }
             } else {

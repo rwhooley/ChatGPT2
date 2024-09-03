@@ -288,7 +288,8 @@ struct BankView: View {
 
         alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
 
-        if let rootViewController = UIApplication.shared.windows.first?.rootViewController {
+        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+           let rootViewController = windowScene.windows.first?.rootViewController {
             rootViewController.present(alert, animated: true, completion: nil)
         }
     }
@@ -312,9 +313,11 @@ struct BankView: View {
 
         alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
 
-        if let rootViewController = UIApplication.shared.windows.first?.rootViewController {
+        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+           let rootViewController = windowScene.windows.first?.rootViewController {
             rootViewController.present(alert, animated: true, completion: nil)
         }
+
     }
 
     private func initializePaymentSheet(for amount: Double) {
@@ -342,7 +345,8 @@ struct BankView: View {
     }
 
     private func presentPaymentSheet(_ paymentSheet: PaymentSheet) {
-        if let rootViewController = UIApplication.shared.windows.first?.rootViewController {
+        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+           let rootViewController = windowScene.windows.first?.rootViewController {
             paymentSheet.present(from: rootViewController) { result in
                 self.handlePaymentResult(result)
             }
@@ -402,7 +406,8 @@ struct BankView: View {
 
         alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
 
-        if let rootViewController = UIApplication.shared.windows.first?.rootViewController {
+        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+           let rootViewController = windowScene.windows.first?.rootViewController {
             rootViewController.present(alert, animated: true, completion: nil)
         }
     }
@@ -477,11 +482,12 @@ struct InvestmentDetailsView: View {
                     }
                     .pickerStyle(MenuPickerStyle()) // This changes it to a dropdown
                     .padding()
-                    .onChange(of: selectedMonth) { newValue in
-                        if newValue.isEmpty {
+                    .onChange(of: selectedMonth) {
+                        if selectedMonth.isEmpty {
                             selectedMonth = "Please select a month"
                         }
                     }
+
 
                     Text("Amount: $100")
                         .font(.headline)

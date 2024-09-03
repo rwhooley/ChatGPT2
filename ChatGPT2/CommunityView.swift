@@ -135,9 +135,10 @@ class CommunityViewModel: ObservableObject {
                     print("Error fetching friend requests: \(error?.localizedDescription ?? "Unknown error")")
                     return
                 }
-                self?.friendRequests = documents.compactMap { try? FriendRequest(dictionary: $0.data()) }
+                self?.friendRequests = documents.compactMap { FriendRequest(dictionary: $0.data()) }
             }
     }
+
     
     private func loadFriends() {
         // Implement friend loading logic

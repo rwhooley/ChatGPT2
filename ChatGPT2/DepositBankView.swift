@@ -49,7 +49,7 @@ struct DepositBankView: View {
                 Section(header: Text("Custom Amount")) {
                     TextField("Enter amount", text: $customAmount)
                         .keyboardType(.decimalPad)
-                        .onChange(of: customAmount) { _ in
+                        .onChange(of: customAmount) {
                             selectedAmount = nil
                         }
                 }
@@ -92,7 +92,8 @@ struct DepositBankView: View {
     }
 
     private func presentPaymentSheet(_ paymentSheet: PaymentSheet) {
-        if let rootViewController = UIApplication.shared.windows.first?.rootViewController {
+        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+           let rootViewController = windowScene.windows.first?.rootViewController {
             paymentSheet.present(from: rootViewController) { result in
                 self.handlePaymentResult(result)
             }

@@ -14,7 +14,6 @@ class WorkoutManager: NSObject, ObservableObject {
     @Published var distance: Double = 0
     @Published var calories: Double = 0
     @Published var heartRate: Double = 0
-    @Published var workoutType: HKWorkoutActivityType?
     
     private var healthStore: HKHealthStore?
     private var timer: Timer?
@@ -53,39 +52,61 @@ class WorkoutManager: NSObject, ObservableObject {
     }
     
     func startWorkout(workoutType: HKWorkoutActivityType) {
-        self.workoutType = workoutType
         startDate = Date()
         isWorkoutInProgress = true
         startTimer()
-        startQueries()
+        startQueries(for: workoutType)
     }
     
     func endWorkout() {
-        guard let startDate = startDate, let workoutType = workoutType else { return }
+        guard let healthStore = healthStore, let startDate = startDate else { return }
         
         stopTimer()
         stopQueries()
         isWorkoutInProgress = false
         
         let endDate = Date()
-        let workout = HKWorkout(activityType: workoutType,
-                                start: startDate,
-                                end: endDate,
-                                duration: endDate.timeIntervalSince(startDate),
-                                totalEnergyBurned: HKQuantity(unit: .kilocalorie(), doubleValue: calories),
-                                totalDistance: HKQuantity(unit: .meter(), doubleValue: distance),
-                                metadata: nil)
         
-        healthStore?.save(workout) { (success, error) in
+        let workoutBuilder = HKWorkoutBuilder(healthStore: healthStore, configuration: HKWorkoutConfiguration(), device: .local())
+        
+        workoutBuilder.beginCollection(withStart: startDate) { success, error in
             if let error = error {
-                print("Error saving workout: \(error.localizedDescription)")
-            } else {
-                print("Workout saved successfully")
+                print("Error beginning workout collection: \(error.localizedDescription)")
+                return
+            }
+            
+            let totalDistance = HKQuantity(unit: .meter(), doubleValue: self.distance)
+            let totalEnergyBurned = HKQuantity(unit: .kilocalorie(), doubleValue: self.calories)
+            
+            let distanceSample = HKQuantitySample(type: HKObjectType.quantityType(forIdentifier: .distanceWalkingRunning)!, quantity: totalDistance, start: startDate, end: endDate)
+            let energySample = HKQuantitySample(type: HKObjectType.quantityType(forIdentifier: .activeEnergyBurned)!, quantity: totalEnergyBurned, start: startDate, end: endDate)
+            
+            workoutBuilder.add([distanceSample, energySample]) { success, error in
+                if let error = error {
+                    print("Error adding samples to workout: \(error.localizedDescription)")
+                    return
+                }
+                
+                workoutBuilder.endCollection(withEnd: endDate) { success, error in
+                    if let error = error {
+                        print("Error ending workout collection: \(error.localizedDescription)")
+                        return
+                    }
+                    
+                    workoutBuilder.finishWorkout { workout, error in
+                        if let error = error {
+                            print("Error finishing workout: \(error.localizedDescription)")
+                        } else {
+                            print("Workout saved successfully: \(String(describing: workout))")
+                        }
+                    }
+                }
             }
         }
         
         resetWorkoutMetrics()
     }
+
     
     private func startTimer() {
         timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
@@ -99,8 +120,8 @@ class WorkoutManager: NSObject, ObservableObject {
         timer = nil
     }
     
-    private func startQueries() {
-        startDistanceQuery()
+    private func startQueries(for workoutType: HKWorkoutActivityType) {
+        startDistanceQuery(for: workoutType)
         startCaloriesQuery()
         startHeartRateQuery()
     }
@@ -121,7 +142,7 @@ class WorkoutManager: NSObject, ObservableObject {
         heartRateQuery = nil
     }
     
-    private func startDistanceQuery() {
+    private func startDistanceQuery(for workoutType: HKWorkoutActivityType) {
         guard let startDate = startDate else { return }
         
         let distanceType = workoutType == .cycling ?
@@ -210,6 +231,5 @@ class WorkoutManager: NSObject, ObservableObject {
         calories = 0
         heartRate = 0
         startDate = nil
-        workoutType = nil
     }
 }

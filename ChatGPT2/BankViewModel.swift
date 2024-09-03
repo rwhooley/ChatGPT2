@@ -195,8 +195,7 @@ class BankViewModel: ObservableObject {
                 return nil
             }
             
-            guard let oldTotalBalance = userDocument.data()?["totalBalance"] as? Double,
-                  let oldInvestedBalance = userDocument.data()?["investedBalance"] as? Double,
+            guard let oldInvestedBalance = userDocument.data()?["investedBalance"] as? Double,
                   let oldFreeBalance = userDocument.data()?["freeBalance"] as? Double else {
                 let error = NSError(domain: "AppErrorDomain", code: -1, userInfo: [NSLocalizedDescriptionKey: "Unable to retrieve user balances"])
                 errorPointer?.pointee = error
@@ -226,8 +225,6 @@ class BankViewModel: ObservableObject {
             }
         }
     }
-
-    
 
 
     func getCurrentYear() -> String {

@@ -18,7 +18,7 @@ class AppState: ObservableObject {
         }
         
         // Listen for authentication state changes
-        Auth.auth().addStateDidChangeListener { [weak self] _, user in
+        _ = Auth.auth().addStateDidChangeListener { [weak self] _, user in
             DispatchQueue.main.async {
                 self?.isLoggedIn = user != nil
             }
