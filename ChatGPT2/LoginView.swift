@@ -19,10 +19,15 @@ struct LoginView: View {
         NavigationView {
             VStack {
                 // Header
-                Text("ANTELOPE FITNESS CLUB")
+                Text("ANTELOPE")
                     .font(.largeTitle)
                     .fontWeight(.bold)
                     .padding(.top, 50)
+                
+                Text("FITNESS CLUB")
+                    .font(.title)
+                    .fontWeight(.bold)
+                    
                 
                 Spacer()
                 
