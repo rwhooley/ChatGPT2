@@ -56,142 +56,160 @@ struct BankView: View {
     }
 
     var body: some View {
-        NavigationView {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 20) {
-                    Text("Wallet 💰")
-                        .font(.title)
-                        .fontWeight(.bold)
-                        .padding(.horizontal, 0)
+            NavigationView {
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 20) {
+//                        headerSection
 
-                    balanceModule
+                        balanceModule
 
-                                       stripeAccountStatusView
+                        investmentSection
 
-                                       Spacer()
-                                       
-                                       Text("Investments 📈")
-                                           .font(.title)
-                                           .fontWeight(.bold)
-                                           .padding(.horizontal, 0)
-
-                                       investmentModule
-
-                                   }
-                                   .padding([.horizontal, .bottom])
-                                   .frame(maxWidth: .infinity) // Make sure the parent VStack stretches to the full width
-                               }
-            .navigationBarHidden(true)
-            .onAppear {
-                viewModel.fetchInvestments()
-                setupBalanceListener()
-                viewModel.fetchBalances { totalBalance, investedBalance, freeBalance, error in
-                    if let error = error {
-                        print("Error fetching balances: \(error)")
-                        return
-                    }
-                    // Handle the fetched balances
-                    DispatchQueue.main.async {
-                        self.totalBalance = totalBalance
-                        self.investedBalance = investedBalance
-                        self.freeBalance = freeBalance
-                    }
-                }
-                viewModel.fetchExternalAccountInfo()
-                viewModel.checkAccountStatus { _ in }
-            }
-            .onDisappear {
-                balanceListener?.remove()
-            }
-            .alert(isPresented: $showingAlert) {
-                Alert(title: Text("Notice"), message: Text(alertMessage), dismissButton: .default(Text("OK")))
-            }
-            .sheet(isPresented: $showingSafari) {
-                if let url = safariURL {
-                    SafariView(url: url)
-                }
-            }
-        }
-    }
-
-    var balanceModule: some View {
-            VStack(alignment: .leading, spacing: 15) {
-                balanceRow(title: "Total Balance", amount: totalBalance)
-                Divider()
-                balanceRow(title: "Invested Balance", amount: investedBalance)
-                balanceRow(title: "Free Balance", amount: freeBalance)
-                
-                if viewModel.stripeAccountStatus == "active" {
-                    HStack {
-                        depositButton
-                        withdrawButton
-                    }
-                }
-            }
-            .padding()
-            .background(RoundedRectangle(cornerRadius: 15).fill(Color.gray.opacity(0.25))) // Rounded rectangle frame
-            .frame(maxWidth: .infinity) // Ensure this module takes up the full available width
-            .cornerRadius(10)
-            .padding(.horizontal, 0)
-        }
-
-    var investmentModule: some View {
-        VStack(alignment: .leading, spacing: 15) {
-            if viewModel.currentInvestments.isEmpty {
-                Text("No current investments")
-                    .foregroundColor(.secondary)
-            } else {
-                ForEach(viewModel.currentInvestments, id: \.id) { investment in
-                    HStack {
-                        Text(investment.month)
                         Spacer()
-                        Text("$\(investment.amount, specifier: "%.2f")")
+
+                        stripeAccountStatusView
                     }
-                    .font(.headline)
+                    .padding()
+                }
+                .navigationBarHidden(true)
+                .onAppear {
+                    viewModel.fetchInvestments()
+                    setupBalanceListener()
+                    viewModel.fetchBalances { totalBalance, investedBalance, freeBalance, error in
+                        if let error = error {
+                            print("Error fetching balances: \(error)")
+                            return
+                        }
+                        // Handle the fetched balances
+                        DispatchQueue.main.async {
+                            self.totalBalance = totalBalance
+                            self.investedBalance = investedBalance
+                            self.freeBalance = freeBalance
+                        }
+                    }
+                    viewModel.fetchExternalAccountInfo()
+                    viewModel.checkAccountStatus { _ in }
+                }
+                .onDisappear {
+                    balanceListener?.remove()
+                }
+                .alert(isPresented: $showingAlert) {
+                    Alert(title: Text("Notice"), message: Text(alertMessage), dismissButton: .default(Text("OK")))
+                }
+                .sheet(isPresented: $showingSafari) {
+                    if let url = safariURL {
+                        SafariView(url: url)
+                    }
                 }
             }
+        }
 
-            Button(action: {
-                showingInvestmentMenu = true
-            }) {
-                Text("Invest")
-                    .font(.headline)
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color.green)
-                    .cornerRadius(10)
-            }
-            .actionSheet(isPresented: $showingInvestmentMenu) {
-                ActionSheet(title: Text("Investment Options"), buttons: [
-                    .default(Text("Invest in Yourself")) {
-                        showInvestmentDetails = true
-                    },
-                    .default(Text("Invest in a Friend")) {
-                        alertMessage = "This option is not available yet."
-                        showingAlert = true
-                    },
-                    .default(Text("Invest in a Group")) {
-                        alertMessage = "This option is not available yet."
-                        showingAlert = true
-                    },
-                    .cancel()
-                ])
-            }
-            .sheet(isPresented: $showInvestmentDetails) {
-                InvestmentDetailsView(
-                    selectedMonth: $selectedMonth,
-                    showInvestmentDetails: $showInvestmentDetails,
-                    viewModel: viewModel
-                )
+    // Header Section
+//        var headerSection: some View {
+//            VStack(alignment: .leading) {
+//                Text("Wallet 💰")
+//                    .font(.largeTitle)
+//                    .fontWeight(.bold)
+//                Divider()
+//            }
+//            .padding(.bottom, 10)
+//        }
+    
+    // Balance Module Section
+    var balanceModule: some View {
+        VStack(alignment: .leading, spacing: 15) {
+            // Move the "Wallet" label inside the frame
+            Text("Wallet")
+                .font(.title)
+                .fontWeight(.bold)
+            Divider()
+            
+            // Balance Rows
+            balanceRow(title: "Total Balance", amount: totalBalance)
+            balanceRow(title: "Invested Balance", amount: investedBalance)
+            balanceRow(title: "Free Balance", amount: freeBalance)
+                
+
+            // Buttons for Deposit and Withdraw
+            if totalBalance == 0 {
+                HStack {
+                    depositButton
+                }
+            } else if totalBalance > 0 {
+                HStack {
+                    depositButton
+                    withdrawButton
+                }
             }
         }
         .padding()
-        .background(RoundedRectangle(cornerRadius: 15).fill(Color.gray.opacity(0.25))) // Rounded rectangle frame
-        .frame(maxWidth: .infinity) // Ensure this module takes up the full available width
+        .background(RoundedRectangle(cornerRadius: 15).fill(Color.gray.opacity(0.15))) // Rounded rectangle frame
         .cornerRadius(10)
-        .padding(.horizontal, 0)
     }
+
+  
+    
+        // Investment Section
+        var investmentSection: some View {
+            VStack(alignment: .leading, spacing: 15) {
+                Text("Investments")
+                    .font(.title)
+                    .fontWeight(.bold)
+                Divider()
+
+                if viewModel.currentInvestments.isEmpty {
+                    Text("No current investments")
+                        .foregroundColor(.secondary)
+                } else {
+                    ForEach(viewModel.currentInvestments, id: \.id) { investment in
+                        HStack {
+                            Text(investment.month)
+                            Spacer()
+                            Text("$\(investment.amount, specifier: "%.2f")")
+                        }
+                        .font(.headline)
+                    }
+                }
+
+                Button(action: {
+                    showingInvestmentMenu = true
+                }) {
+                    Text("Invest")
+                        .font(.headline)
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color.green)
+                        .cornerRadius(10)
+                }
+                .actionSheet(isPresented: $showingInvestmentMenu) {
+                    ActionSheet(title: Text("Investment Options"), buttons: [
+                        .default(Text("Invest in Yourself")) {
+                            showInvestmentDetails = true
+                        },
+                        .default(Text("Invest in a Friend")) {
+                            alertMessage = "This option is not available yet."
+                            showingAlert = true
+                        },
+                        .default(Text("Invest in a Group")) {
+                            alertMessage = "This option is not available yet."
+                            showingAlert = true
+                        },
+                        .cancel()
+                    ])
+                }
+                .sheet(isPresented: $showInvestmentDetails) {
+                    InvestmentDetailsView(
+                        selectedMonth: $selectedMonth,
+                        showInvestmentDetails: $showInvestmentDetails,
+                        viewModel: viewModel
+                    )
+                }
+            }
+            .padding()
+            .background(RoundedRectangle(cornerRadius: 15).fill(Color.gray.opacity(0.15))) // Rounded rectangle frame
+            .cornerRadius(10)
+        }
 
     var stripeAccountStatusView: some View {
         HStack {
@@ -199,15 +217,15 @@ struct BankView: View {
                 ProgressView()
                     .padding(.trailing, 5)
                 Text("Checking account status...")
-            } else if viewModel.stripeAccountStatus == "not_created" || viewModel.stripeAccountStatus == "pending" {
-                Text("Connect an account to transfer money.")
-                Spacer()
-                Button(action: {
-                    createOrContinueStripeAccount()
-                }) {
-                    Image(systemName: "plus.circle")
-                        .foregroundColor(.blue)
-                }
+//            } else if viewModel.stripeAccountStatus == "not_created" || viewModel.stripeAccountStatus == "pending" {
+//                Text("Connect an account to transfer money.")
+//                Spacer()
+//                Button(action: {
+//                    createOrContinueStripeAccount()
+//                }) {
+//                    Image(systemName: "plus.circle")
+//                        .foregroundColor(.blue)
+//                }
             } else if viewModel.stripeAccountStatus == "active" {
                 Text("Stripe Connected Account: \(viewModel.maskedExternalAccount)")
                     .font(.footnote)
@@ -228,48 +246,66 @@ struct BankView: View {
         }
     }
 
-    var depositButton: some View {
-        Button(action: {
-            showDepositOptions()
-        }) {
-            Text("Deposit")
-                .font(.headline)
-                .foregroundColor(.white)
-                .frame(maxWidth: .infinity)
-                .padding()
-                .background(Color.blue)
-                .cornerRadius(10)
+    // Deposit Button
+        var depositButton: some View {
+            Button(action: {
+                showDepositOptions()
+            }) {
+                Text("Deposit")
+                    .font(.headline)
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Color.blue)
+                    .cornerRadius(10)
+            }
+            .disabled(isProcessingPayment)
         }
-        .disabled(isProcessingPayment)
-    }
 
-    var withdrawButton: some View {
-        Button(action: {
-            showWithdrawOptions()
-        }) {
-            Text("Withdraw")
-                .font(.headline)
-                .foregroundColor(.white)
-                .frame(maxWidth: .infinity)
-                .padding()
-                .background(Color.red)
-                .cornerRadius(10)
+        // Withdraw Button
+        var withdrawButton: some View {
+            Button(action: {
+                if viewModel.stripeAccountStatus == "active" {
+                    // User has connected a bank account, initiate withdrawal process
+                    showWithdrawOptions()
+                } else {
+                    // User has not connected a bank account, initiate account connection
+                    createOrContinueStripeAccount()
+                }
+            }) {
+                Text("Withdraw")
+                    .font(.headline)
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Color.red)
+                    .cornerRadius(10)
+            }
+            .disabled(isProcessingPayment)
         }
-        .disabled(isProcessingPayment)
-    }
+
 
     private func createOrContinueStripeAccount() {
         viewModel.createOrRetrieveStripeAccount { result in
             switch result {
             case .success(let url):
-                safariURL = url
-                showingSafari = true
+                DispatchQueue.main.async {
+                    self.safariURL = url
+                    // Add a short delay to ensure the sheet triggers correctly
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                        self.showingSafari = true
+                    }
+                }
             case .failure(let error):
-                alertMessage = "Failed to create Stripe account: \(error.localizedDescription)"
-                showingAlert = true
+                DispatchQueue.main.async {
+                    self.alertMessage = "Failed to create Stripe account: \(error.localizedDescription)"
+                    self.showingAlert = true
+                }
             }
         }
     }
+
+
 
     private func showDepositOptions() {
         let alert = UIAlertController(title: "Select Deposit Amount", message: nil, preferredStyle: .actionSheet)

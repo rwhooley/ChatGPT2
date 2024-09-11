@@ -7,9 +7,11 @@
 
 import Foundation
 
-struct AppUser: Identifiable {
+struct AppUser {
     let id: String
-    let name: String
+    let firstName: String
+    let lastName: String
     let email: String
     let memberSince: Date
 }
+

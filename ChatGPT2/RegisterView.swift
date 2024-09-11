@@ -15,6 +15,7 @@ struct RegisterView: View {
     @State private var email = ""
     @State private var password = ""
     @State private var confirmPassword = ""
+    @State private var phoneNumber = ""
     @State private var errorMessage = ""
     @State private var showingAlert = false
     @Environment(\.presentationMode) var presentationMode
@@ -39,6 +40,10 @@ struct RegisterView: View {
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .autocapitalization(.none)
                     .keyboardType(.emailAddress)
+                
+                TextField("Phone Number", text: $phoneNumber)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .keyboardType(.phonePad)
                 
                 SecureField("Password", text: $password)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
@@ -73,6 +78,12 @@ struct RegisterView: View {
             return
         }
         
+        if phoneNumber.isEmpty {
+            errorMessage = "Phone number is required"
+            showingAlert = true
+            return
+        }
+        
         Auth.auth().createUser(withEmail: email, password: password) { authResult, error in
             if let error = error {
                 errorMessage = error.localizedDescription
@@ -83,7 +94,8 @@ struct RegisterView: View {
                 db.collection("users").document(user.uid).setData([
                     "firstName": firstName,
                     "lastName": lastName,
-                    "email": email
+                    "email": email,
+                    "phoneNumber": phoneNumber
                 ]) { err in
                     if let err = err {
                         print("Error writing user data: \(err)")

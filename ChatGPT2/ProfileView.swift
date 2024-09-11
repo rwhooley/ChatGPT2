@@ -5,6 +5,13 @@
 //  Created by Ryan Whooley on 8/25/24.
 //
 
+//
+//  ProfileView.swift
+//  ChatGPT2
+//
+//  Created by Ryan Whooley on 8/25/24.
+//
+
 import SwiftUI
 import FirebaseFirestore
 import FirebaseAuth
@@ -23,7 +30,7 @@ struct ProfileView: View {
 
     var body: some View {
         NavigationView {
-            Group {
+            VStack {
                 if isLoading {
                     ProgressView()
                 } else if let user = user {
@@ -33,38 +40,58 @@ struct ProfileView: View {
                 }
             }
             .navigationTitle("Profile")
-            .alert(isPresented: $showingHealthKitError) {
-                Alert(title: Text("HealthKit Error"), message: Text(healthKitErrorMessage), dismissButton: .default(Text("OK")))
+            .alert("HealthKit Error", isPresented: $showingHealthKitError) {
+                Button("OK", role: .cancel) { }
+            } message: {
+                Text(healthKitErrorMessage)
             }
-            .alert(isPresented: $showingLogoutAlert) {
-                Alert(
-                    title: Text("Log Out"),
-                    message: Text("Are you sure you want to log out?"),
-                    primaryButton: .destructive(Text("Log Out")) {
-                        logOut()
-                    },
-                    secondaryButton: .cancel()
-                )
+            .alert("Log Out", isPresented: $showingLogoutAlert) {
+                Button("Log Out", role: .destructive, action: logOut)
+                Button("Cancel", role: .cancel) { }
+            } message: {
+                Text("Are you sure you want to log out?")
             }
         }
         .onAppear(perform: fetchUserDataAndCheckHealthKitStatus)
     }
 
     private func userProfileContent(user: AppUser) -> some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 20) {
-                Text("Name: \(user.name)")
-                    .font(.headline)
-                Text("Email: \(user.email)")
-                    .font(.headline)
-                Text("Member Since: \(formatDate(user.memberSince))")
-                    .font(.subheadline)
+        VStack {
+            VStack(alignment: .leading, spacing: 10) {
+                // Aligning text to the left
+                Text("Name: \(user.firstName) \(user.lastName)")
+                    .font(.body)
+                    .padding()
 
+                Text("Email: \(user.email)")
+                    .font(.body)
+                    .padding()
+
+//                Text("Member Since: \(formatDate(user.memberSince))")
+//                    .font(.body)
+//                    .padding()
+            }
+            .frame(maxWidth: .infinity, alignment: .leading) // Align left with full width
+
+            Spacer()
+
+            // Buttons at the bottom
+            VStack(spacing: 20) {
                 if healthKitManager.isAuthorized {
                     Button(action: fetchLatestWorkouts) {
                         Text("Refresh Health Data")
                             .padding()
+                            .frame(maxWidth: .infinity)
                             .background(Color.blue)
+                            .foregroundColor(.white)
+                            .cornerRadius(10)
+                    }
+
+                    Button(action: resetSyncDateAndFetchAllWorkouts) {
+                        Text("Reset Sync Date and Fetch All Workouts")
+                            .padding()
+                            .frame(maxWidth: .infinity)
+                            .background(Color.green)
                             .foregroundColor(.white)
                             .cornerRadius(10)
                     }
@@ -72,35 +99,15 @@ struct ProfileView: View {
                     Button(action: connectToHealthKit) {
                         Text("Connect Apple Health")
                             .padding()
+                            .frame(maxWidth: .infinity)
                             .background(Color.blue)
                             .foregroundColor(.white)
                             .cornerRadius(10)
                     }
                 }
 
-                if !latestWorkouts.isEmpty {
-                    VStack(alignment: .leading, spacing: 10) {
-                        Text("Latest Workouts:")
-                            .font(.headline)
-                        ForEach(latestWorkouts) { workout in
-                            HStack {
-                                Text(HKWorkoutActivityType.name(for: workout.type))
-                                Spacer()
-                                Text(formatDuration(workout.duration))
-                            }
-                            .padding(.vertical, 5)
-                        }
-                    }
-                    .padding()
-                    .background(Color.gray.opacity(0.1))
-                    .cornerRadius(10)
-                }
-
-                Spacer()
-
-                Button(action: {
-                    showingLogoutAlert = true
-                }) {
+                // Log out button
+                Button(action: { showingLogoutAlert = true }) {
                     Text("Log Out")
                         .foregroundColor(.white)
                         .padding()
@@ -109,8 +116,10 @@ struct ProfileView: View {
                         .cornerRadius(10)
                 }
             }
-            .padding()
+            .padding(.bottom, 20)
+            .frame(maxWidth: .infinity)
         }
+        .padding()
     }
 
     private func connectToHealthKit() {
@@ -128,12 +137,19 @@ struct ProfileView: View {
     private func fetchLatestWorkouts() {
         healthKitManager.fetchAllDetailedWorkouts { workouts, error in
             if let error = error {
-                healthKitErrorMessage = error.localizedDescription
-                showingHealthKitError = true
+                print("Error fetching workouts: \(error)")
+                self.healthKitErrorMessage = error.localizedDescription
+                self.showingHealthKitError = true
             } else {
                 self.latestWorkouts = Array(workouts.prefix(5)) // Take only the first 5 workouts
+                print("Fetched \(workouts.count) workouts")
             }
         }
+    }
+
+    private func resetSyncDateAndFetchAllWorkouts() {
+        healthKitManager.resetLastSyncDate()
+        fetchLatestWorkouts()
     }
 
     private func fetchUserDataAndCheckHealthKitStatus() {
@@ -157,10 +173,11 @@ struct ProfileView: View {
             if let error = error {
                 self.errorMessage = error.localizedDescription
             } else if let document = document, document.exists, let data = document.data() {
-                let name = data["name"] as? String ?? ""
+                let firstName = data["firstName"] as? String ?? ""
+                let lastName = data["lastName"] as? String ?? ""
                 let email = data["email"] as? String ?? ""
                 let memberSince = (data["memberSince"] as? Timestamp)?.dateValue() ?? Date()
-                self.user = AppUser(id: document.documentID, name: name, email: email, memberSince: memberSince)
+                self.user = AppUser(id: document.documentID, firstName: firstName, lastName: lastName, email: email, memberSince: memberSince)
             } else {
                 self.errorMessage = "User document does not exist or is empty"
             }
@@ -191,15 +208,10 @@ struct ProfileView: View {
     }
 }
 
-struct ProfileView_Previews: PreviewProvider {
-    static var previews: some View {
-        ProfileView()
-            .environmentObject(AppState())
-            .environmentObject(HealthKitManager())
-    }
-}
-
 #Preview {
     ProfileView()
+        .environmentObject(AppState())
         .environmentObject(HealthKitManager())
 }
+
+

@@ -58,6 +58,18 @@ class WorkoutManager: NSObject, ObservableObject {
         startQueries(for: workoutType)
     }
     
+    private func calculateIntensity(avgHeartRate: Double?, maxHeartRate: Double?) -> WorkoutIntensity {
+        // Implement your logic to calculate intensity based on heart rate
+        guard let avg = avgHeartRate else { return .moderate }
+        if avg < 100 {
+            return .low
+        } else if avg < 140 {
+            return .moderate
+        } else {
+            return .high
+        }
+    }
+    
     func endWorkout() {
         guard let healthStore = healthStore, let startDate = startDate else { return }
         
