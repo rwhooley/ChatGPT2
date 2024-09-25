@@ -16,24 +16,30 @@ struct ChatGPT2App: App {
     @StateObject private var appState = AppState()
     @StateObject private var healthKitManager = HealthKitManager()
     @StateObject private var bankViewModel = BankViewModel() // Add BankViewModel as a state object
+    @StateObject private var alertManager = AlertManager()
     
     // Use UIApplicationDelegateAdaptor to create an AppDelegate in a SwiftUI app
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
 
+    
+    
     var body: some Scene {
-        WindowGroup {
-            if appState.isLoggedIn {
-                MainTabView()
-                    .environmentObject(appState)
-                    .environmentObject(healthKitManager)
-                    .environmentObject(bankViewModel) // Inject BankViewModel into the environment
-            } else {
-                LoginView()
-                    .environmentObject(appState)
+            WindowGroup {
+                if appState.isLoggedIn {
+                    MainTabView()
+                        .environmentObject(appState)
+                        .environmentObject(healthKitManager)
+                        .environmentObject(bankViewModel)
+                        .environmentObject(alertManager) // Add this line
+                } else {
+                    LoginView()
+                        .environmentObject(appState)
+                        .environmentObject(alertManager) // Add this line
+                }
             }
         }
     }
-}
+
 
 // Custom AppDelegate class
 class AppDelegate: NSObject, UIApplicationDelegate {

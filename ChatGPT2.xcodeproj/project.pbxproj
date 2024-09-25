@@ -7,6 +7,15 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		E36CBD282C933DC2002E6318 /* CreateCompetitionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E36CBD272C933DC2002E6318 /* CreateCompetitionView.swift */; };
+		E36CBD2A2C937443002E6318 /* CreateCollaborationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E36CBD292C937443002E6318 /* CreateCollaborationView.swift */; };
+		E36CBD302C93B8BB002E6318 /* SummaryModuleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E36CBD2F2C93B8BB002E6318 /* SummaryModuleView.swift */; };
+		E36CBD322C94BF59002E6318 /* AlertManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E36CBD312C94BF59002E6318 /* AlertManager.swift */; };
+		E36CBD3A2C99F39A002E6318 /* HomePersonalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E36CBD392C99F39A002E6318 /* HomePersonalView.swift */; };
+		E36CBD3C2C99F45E002E6318 /* HomeContestsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E36CBD3B2C99F45E002E6318 /* HomeContestsView.swift */; };
+		E36CBD3E2C99F472002E6318 /* HomeTeamsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E36CBD3D2C99F472002E6318 /* HomeTeamsView.swift */; };
+		E36CBD402C99F4DE002E6318 /* HomeFriendsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E36CBD3F2C99F4DE002E6318 /* HomeFriendsView.swift */; };
+		E36CBD422C9A2717002E6318 /* InvestmentDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E36CBD412C9A2717002E6318 /* InvestmentDetailView.swift */; };
 		E3AD61712C7FB547000FEC84 /* StripePaymentSheet in Frameworks */ = {isa = PBXBuildFile; productRef = E3AD61702C7FB547000FEC84 /* StripePaymentSheet */; };
 		E3AD61732C813A97000FEC84 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = E3AD61722C813A97000FEC84 /* GoogleService-Info.plist */; };
 		E3AD61752C821DBF000FEC84 /* DepositBankView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3AD61742C821DBF000FEC84 /* DepositBankView.swift */; };
@@ -24,6 +33,8 @@
 		E3C50E542C7BBB3E00978B8F /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3C50E532C7BBB3E00978B8F /* HomeView.swift */; };
 		E3C50E562C7BBFA400978B8F /* BankView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3C50E552C7BBFA400978B8F /* BankView.swift */; };
 		E3C50E582C7BC01E00978B8F /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3C50E572C7BC01E00978B8F /* MainTabView.swift */; };
+		E3DB8AD12C9DF2BD00776571 /* CollapsibleContestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3DB8AD02C9DF2BD00776571 /* CollapsibleContestView.swift */; };
+		E3DB8AD32C9E107D00776571 /* ContestTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3DB8AD22C9E107D00776571 /* ContestTracker.swift */; };
 		E3DBD0BC2C7E16B2000DEB20 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3DBD0BB2C7E16B2000DEB20 /* Extensions.swift */; };
 		E3E455CE2C7E9BE9007C1205 /* DetailedWorkout.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E455CD2C7E9BE9007C1205 /* DetailedWorkout.swift */; };
 		E3E8243F2C7BC439005DE715 /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E8243E2C7BC439005DE715 /* ProfileView.swift */; };
@@ -43,6 +54,15 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		E36CBD272C933DC2002E6318 /* CreateCompetitionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateCompetitionView.swift; sourceTree = "<group>"; };
+		E36CBD292C937443002E6318 /* CreateCollaborationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateCollaborationView.swift; sourceTree = "<group>"; };
+		E36CBD2F2C93B8BB002E6318 /* SummaryModuleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SummaryModuleView.swift; sourceTree = "<group>"; };
+		E36CBD312C94BF59002E6318 /* AlertManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertManager.swift; sourceTree = "<group>"; };
+		E36CBD392C99F39A002E6318 /* HomePersonalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomePersonalView.swift; sourceTree = "<group>"; };
+		E36CBD3B2C99F45E002E6318 /* HomeContestsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeContestsView.swift; sourceTree = "<group>"; };
+		E36CBD3D2C99F472002E6318 /* HomeTeamsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeTeamsView.swift; sourceTree = "<group>"; };
+		E36CBD3F2C99F4DE002E6318 /* HomeFriendsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeFriendsView.swift; sourceTree = "<group>"; };
+		E36CBD412C9A2717002E6318 /* InvestmentDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InvestmentDetailView.swift; sourceTree = "<group>"; };
 		E3AD61722C813A97000FEC84 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		E3AD61742C821DBF000FEC84 /* DepositBankView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DepositBankView.swift; sourceTree = "<group>"; };
 		E3AD61762C821F0A000FEC84 /* BankViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BankViewModel.swift; sourceTree = "<group>"; };
@@ -58,6 +78,8 @@
 		E3C50E532C7BBB3E00978B8F /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 		E3C50E552C7BBFA400978B8F /* BankView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BankView.swift; sourceTree = "<group>"; };
 		E3C50E572C7BC01E00978B8F /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
+		E3DB8AD02C9DF2BD00776571 /* CollapsibleContestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollapsibleContestView.swift; sourceTree = "<group>"; };
+		E3DB8AD22C9E107D00776571 /* ContestTracker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContestTracker.swift; sourceTree = "<group>"; };
 		E3DBD0BB2C7E16B2000DEB20 /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
 		E3E455CD2C7E9BE9007C1205 /* DetailedWorkout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailedWorkout.swift; sourceTree = "<group>"; };
 		E3E8243E2C7BC439005DE715 /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
@@ -128,13 +150,24 @@
 				E3E455CD2C7E9BE9007C1205 /* DetailedWorkout.swift */,
 				E3C50E472C7BB24500978B8F /* LoginView.swift */,
 				E3E824562C7C03FE005DE715 /* WorkoutTypeSelectionView.swift */,
+				E36CBD312C94BF59002E6318 /* AlertManager.swift */,
 				E3E824582C7C043B005DE715 /* WorkoutManager.swift */,
 				E3AD61742C821DBF000FEC84 /* DepositBankView.swift */,
 				E3C50E552C7BBFA400978B8F /* BankView.swift */,
+				E36CBD412C9A2717002E6318 /* InvestmentDetailView.swift */,
 				E3AD61762C821F0A000FEC84 /* BankViewModel.swift */,
 				E3C50E492C7BB38500978B8F /* RegisterView.swift */,
+				E36CBD272C933DC2002E6318 /* CreateCompetitionView.swift */,
+				E36CBD292C937443002E6318 /* CreateCollaborationView.swift */,
 				E3E8245A2C7C060D005DE715 /* WorkoutView.swift */,
 				E3C50E532C7BBB3E00978B8F /* HomeView.swift */,
+				E36CBD392C99F39A002E6318 /* HomePersonalView.swift */,
+				E3DB8AD22C9E107D00776571 /* ContestTracker.swift */,
+				E3DB8AD02C9DF2BD00776571 /* CollapsibleContestView.swift */,
+				E36CBD3B2C99F45E002E6318 /* HomeContestsView.swift */,
+				E36CBD3D2C99F472002E6318 /* HomeTeamsView.swift */,
+				E36CBD3F2C99F4DE002E6318 /* HomeFriendsView.swift */,
+				E36CBD2F2C93B8BB002E6318 /* SummaryModuleView.swift */,
 				E3E8243E2C7BC439005DE715 /* ProfileView.swift */,
 				E3E824522C7BFFAE005DE715 /* CommunityView.swift */,
 				E3AD617C2C86530A000FEC84 /* SwiftUIView.swift */,
@@ -264,24 +297,35 @@
 			files = (
 				E3E8243F2C7BC439005DE715 /* ProfileView.swift in Sources */,
 				E3E824592C7C043B005DE715 /* WorkoutManager.swift in Sources */,
+				E36CBD402C99F4DE002E6318 /* HomeFriendsView.swift in Sources */,
 				E3E824572C7C03FE005DE715 /* WorkoutTypeSelectionView.swift in Sources */,
 				E3C50E562C7BBFA400978B8F /* BankView.swift in Sources */,
 				E3E8245B2C7C060D005DE715 /* WorkoutView.swift in Sources */,
 				E3E824532C7BFFAE005DE715 /* CommunityView.swift in Sources */,
 				E3C50E482C7BB24500978B8F /* LoginView.swift in Sources */,
 				E3C50E4A2C7BB38500978B8F /* RegisterView.swift in Sources */,
+				E36CBD282C933DC2002E6318 /* CreateCompetitionView.swift in Sources */,
 				E3AD617D2C86530A000FEC84 /* SwiftUIView.swift in Sources */,
 				E3C50E3A2C79413C00978B8F /* ContentView.swift in Sources */,
 				E3E824432C7BC714005DE715 /* User.swift in Sources */,
 				E3AD61772C821F0A000FEC84 /* BankViewModel.swift in Sources */,
+				E36CBD3A2C99F39A002E6318 /* HomePersonalView.swift in Sources */,
 				E3E455CE2C7E9BE9007C1205 /* DetailedWorkout.swift in Sources */,
+				E36CBD302C93B8BB002E6318 /* SummaryModuleView.swift in Sources */,
 				E3E8244B2C7BD89B005DE715 /* PerformanceView.swift in Sources */,
 				E3E8245E2C7CBB5B005DE715 /* AppState.swift in Sources */,
+				E36CBD322C94BF59002E6318 /* AlertManager.swift in Sources */,
+				E36CBD2A2C937443002E6318 /* CreateCollaborationView.swift in Sources */,
+				E3DB8AD32C9E107D00776571 /* ContestTracker.swift in Sources */,
+				E36CBD422C9A2717002E6318 /* InvestmentDetailView.swift in Sources */,
+				E36CBD3E2C99F472002E6318 /* HomeTeamsView.swift in Sources */,
 				E3AD61752C821DBF000FEC84 /* DepositBankView.swift in Sources */,
 				E3C50E582C7BC01E00978B8F /* MainTabView.swift in Sources */,
 				E3C50E542C7BBB3E00978B8F /* HomeView.swift in Sources */,
 				E3DBD0BC2C7E16B2000DEB20 /* Extensions.swift in Sources */,
+				E3DB8AD12C9DF2BD00776571 /* CollapsibleContestView.swift in Sources */,
 				E3E824492C7BCF41005DE715 /* HealthKitManager.swift in Sources */,
+				E36CBD3C2C99F45E002E6318 /* HomeContestsView.swift in Sources */,
 				E3C50E382C79413C00978B8F /* ChatGPT2App.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -415,7 +459,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = ChatGPT2/ChatGPT2.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 9;
+				CURRENT_PROJECT_VERSION = 10;
 				DEVELOPMENT_ASSET_PATHS = "\"ChatGPT2/Preview Content\"";
 				DEVELOPMENT_TEAM = VYYC62P8V5;
 				ENABLE_PREVIEWS = YES;
@@ -449,7 +493,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = ChatGPT2/ChatGPT2.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 9;
+				CURRENT_PROJECT_VERSION = 10;
 				DEVELOPMENT_ASSET_PATHS = "\"ChatGPT2/Preview Content\"";
 				DEVELOPMENT_TEAM = VYYC62P8V5;
 				ENABLE_PREVIEWS = YES;

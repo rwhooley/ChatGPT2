@@ -9,6 +9,7 @@ import SwiftUI
 import HealthKit
 import Firebase
 import FirebaseFirestore
+import FirebaseAuth
 import CoreLocation
 
 struct HomeView: View {
@@ -20,6 +21,67 @@ struct HomeView: View {
     @State private var selectedWorkout: DetailedWorkout?
     @State private var showingWorkoutDetail = false
     @State private var detailPosition: CGPoint = .zero
+    
+    @State private var isPersonalExpanded = true
+    @State private var isGroupExpanded = false
+    @State private var isFriendsExpanded = false
+    
+    @State private var activeContests: [String] = []  // Replace with actual data
+    @State private var activeCollaborations: [String] = []  // Replace with actual data
+    
+    @State private var selectedSection: HomeSection = .personal
+    
+    @State private var userFirstName: String = ""
+    
+    @State private var greetingDismissed = false
+
+    
+    private var greetingModule: some View {
+        let text: String
+        let backgroundColor: Color = Color.gray.opacity(0.2) // Same gray color as the segmented control
+        let cornerRadius: CGFloat = 8 // Adjust to match the corner radius of the picker
+
+        switch selectedSection {
+        case .personal:
+            text = """
+            It’s you versus yourself…and your wallet! Invest in a monthly plan and crush all your workouts to earn a bonus. Consistency is key. If you miss workouts, you might leave money on the table!
+            """
+        case .contests:
+            text = """
+            Up for a friendly wager to get the competitive juices flowing? Create a workout contest, invite friends to join and invest, then compete to see who can earn the most money from the pot.
+            """
+        case .collaborations:
+            text = """
+            Common goals are powerful forces. Create a team, pledge money towards a workout goal, then hold eachother accountable to complete it. If one teammate misses workouts, the whole team loses.
+            """
+        }
+
+        return Group {
+            if !greetingDismissed {
+                HStack {
+                    Text(text)
+                        .font(.caption)
+                        .padding() // Add padding to the text inside
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    
+                    // Dismiss button
+                    Button(action: {
+                        greetingDismissed = true
+                    }) {
+                        Image(systemName: "xmark.circle.fill")
+                            .foregroundColor(.white)
+                            .padding(.trailing, 10)
+                    }
+                }
+                .background(backgroundColor) // Use gray background like the picker
+                .cornerRadius(cornerRadius) // Match the corner radius of the segmented picker
+                .padding(.horizontal, 0) // Align the greeting module with the picker width
+                .padding(.top, 10) // Padding between the picker and greeting
+            }
+        }
+    }
+
+
     
     private var completedSquares: Int {
         min(completedWorkouts.count, 12)
@@ -45,129 +107,96 @@ struct HomeView: View {
         return formatter.string(from: Date())
     }
     
+    enum HomeSection: String, CaseIterable {
+        case personal = "Personal"
+        case contests = "Contests"
+        case collaborations = "Teams"
+//        case friends = "Friends"
+    }
+    
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 20) {
-                VStack(alignment: .leading, spacing: 10) {
-                    HStack {
-                        Text(currentMonthYear)
-                            .font(.title)
-                            .fontWeight(.bold)
-                        
-                        Button(action: {
-                            showingExplanation = true
-                        }) {
-                            Image(systemName: "questionmark.circle")
-                                .font(.title3)
-                                .foregroundColor(.gray)
-                        }
-                        .sheet(isPresented: $showingExplanation) {
-                            ExplanationView()
-                        }
-                    }
-                    
-                    Text(activeInvestment != nil ? "Active Investment" : "No Active Investment. Make a deposit to invest.")
-                        .foregroundColor(activeInvestment != nil ? .green : .gray)
-                        .font(.headline)
+        VStack(spacing: 0) {
+            
+            
+//            // Investments label
+//                  Text("WORKOUTS")
+//                .font(.headline)
+//                      .padding(.top, 5)
+//                      .padding(.bottom, 5)
+//                      .frame(maxWidth: .infinity, alignment: .center)
+//                      .background(Color.gray.opacity(0.2))
+            
+            // Segmented Picker (3-way toggle)
+                       Picker("Select Section", selection: $selectedSection) {
+                           ForEach(HomeSection.allCases, id: \.self) { section in
+                               Text(section.rawValue).tag(section)
+                           }
+                       }
+                       .pickerStyle(SegmentedPickerStyle())
+                       .padding(.horizontal)
+            
+            greetingModule
+                .padding()
+                       
+                       // Content based on selected section
+                       ScrollView {
+                           VStack(alignment: .leading, spacing: 20) {
+                               switch selectedSection {
+                               case .personal:
+                                   HomePersonalView(
+                                       activeInvestment: $activeInvestment,
+                                       completedWorkouts: $completedWorkouts,
+                                       selectedWorkout: $selectedWorkout,
+                                       showingWorkoutDetail: $showingWorkoutDetail
+                                   )
+                               case .contests:
+                                   HomeContestsView()
+                               case .collaborations:
+                                   HomeTeamsView()
+                               }
+                           }
+                           .padding()
+                       }
+                   }
+                   .navigationTitle("Home")
+                   .onAppear {
+                       fetchCurrentMonthWorkouts()
+                       fetchCurrentMonthInvestment()
+                       fetchUserFirstName()
+                   }
+               }
+    
+    private func fetchUserFirstName() {
+        guard let userId = Auth.auth().currentUser?.uid else {
+            print("Debug: No current user ID available")
+            return
+        }
+        
+        let db = Firestore.firestore()
+        db.collection("users").document(userId).getDocument { (document, error) in
+            if let error = error {
+                print("Debug: Error fetching user document: \(error.localizedDescription)")
+                return
+            }
+            
+            guard let document = document, document.exists else {
+                print("Debug: User document does not exist")
+                return
+            }
+            
+            if let firstName = document.data()?["firstName"] as? String {
+                print("Debug: Fetched firstName: '\(firstName)'")
+                DispatchQueue.main.async {
+                    self.userFirstName = firstName
                 }
-                .padding(.bottom, 20)
-                
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("Earnings")
-                        .font(.title)
-                        .fontWeight(.bold)
-                    
-                    HStack(spacing: 20) {
-                        VStack {
-                            Text("Earned")
-                                .font(.subheadline)
-                                .foregroundColor(.gray)
-                                .padding(.top, 10)
-                                .frame(maxWidth: .infinity, alignment: .center)
-                            Spacer()
-                            Text("$\(Int(totalEarnedAmount))")
-                                .font(.title2)
-                                .fontWeight(.bold)
-                                .frame(maxWidth: .infinity, alignment: .center)
-                            Spacer()
-                        }
-                        .frame(maxWidth: .infinity, minHeight: 80)
-                        .padding()
-                        .background(RoundedRectangle(cornerRadius: 10).fill(Color.gray.opacity(0.2)))
-                        
-                        VStack {
-                            Text("Potential")
-                                .font(.subheadline)
-                                .foregroundColor(.gray)
-                                .padding(.top, 10)
-                                .frame(maxWidth: .infinity, alignment: .center)
-                            Spacer()
-                            Text("$\(Int(possibleAmount))")
-                                .font(.title2)
-                                .fontWeight(.bold)
-                                .frame(maxWidth: .infinity, alignment: .center)
-                            Spacer()
-                        }
-                        .frame(maxWidth: .infinity, minHeight: 80)
-                        .padding()
-                        .background(RoundedRectangle(cornerRadius: 10).fill(Color.gray.opacity(0.2)))
-                    }
-                    
-                    Spacer()
-                    
-                    Text("Progress")
-                        .font(.title)
-                        .fontWeight(.bold)
+            } else {
+                print("Debug: 'firstName' field not found or not a string in user document")
+                DispatchQueue.main.async {
+                    self.userFirstName = "there"
                 }
-                
-                LazyVGrid(columns: columns, spacing: 10) {
-                                    ForEach(0..<12, id: \.self) { index in
-                                        ZStack {
-                                            RoundedRectangle(cornerRadius: 5)
-                                                .fill(index < completedSquares ? Color.green : (index >= 10 ? Color.orange.opacity(0.3) : Color.gray.opacity(0.3)))
-                                                .frame(height: (UIScreen.main.bounds.width - 50) / 4)
-                                            
-                                            Text(activeInvestment != nil ?
-                                                 (index < 10 ? "$\(Int(activeInvestment!.amount / 10))" : "$25") :
-                                                    "$0")
-                                            .font(.body)
-                                            .fontWeight(.bold)
-                                            .foregroundColor(index < completedSquares ? .white : .black)
-                                        }
-                                        .onTapGesture {
-                                            if index < completedWorkouts.count {
-                                                selectedWorkout = completedWorkouts[index]
-                                                showingWorkoutDetail = true
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                            .padding()
-                        }
-                        .overlay(
-                            Group {
-                                if showingWorkoutDetail, let workout = selectedWorkout {
-                                    Color.black.opacity(0.3)
-                                        .edgesIgnoringSafeArea(.all)
-                                        .onTapGesture {
-                                            showingWorkoutDetail = false
-                                        }
-                                    
-                                    WorkoutDetailView(workout: workout) {
-                                        showingWorkoutDetail = false
-                                    }
-                                    .transition(.scale)
-                                    .animation(.easeInOut, value: showingWorkoutDetail)
-                                }
-                            }
-                        )
-                        .navigationTitle("Home")
-                        .onAppear {
-                            fetchCurrentMonthWorkouts()
-                            fetchCurrentMonthInvestment()
-                        }
-                    }
+            }
+        }
+    }
     
     private func fetchCurrentMonthInvestment() {
         bankViewModel.fetchCurrentMonthInvestment { investment in

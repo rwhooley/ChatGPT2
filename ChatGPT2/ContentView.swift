@@ -8,7 +8,8 @@
 import SwiftUI
 
 struct ContentView: View {
-   
+    @EnvironmentObject var alertManager: AlertManager
+    
     
     var body: some View {
         TabView {
@@ -26,6 +27,13 @@ struct ContentView: View {
                 .tabItem {
                     Label("Profile", systemImage: "person")
                 }
+                .alert(isPresented: $alertManager.showAlert) {
+                            Alert(
+                                title: Text(alertManager.alertTitle),
+                                message: Text(alertManager.alertMessage),
+                                dismissButton: .default(Text("OK"))
+                            )
+                        }
         }
         
     }

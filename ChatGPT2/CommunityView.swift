@@ -584,23 +584,58 @@ struct User: Identifiable {
     let email: String
 }
 
-struct Workout: Identifiable {
+struct Workout {
     let id: String
     let userID: String
     let distance: Double
-    let duration: Double
+    let duration: Double  // Duration in minutes or seconds
     let type: String
     let timestamp: Date
-    let firstName: String
-    let lastName: String
-    let sourceName: String
-    let calories: Int
-    let averageHeartRate: Double?
-    let maxHeartRate: Int?
+    let calories: Double
+    let averageHeartRate: Int
+    let maxHeartRate: Int
+    let stepsCount: Int
     let intensity: String
     let routeImageUrl: String?
-    let stepsCount: Int
+
+    // Pace can be derived from distance and duration
+    var pace: Double {
+        return distance > 0 ? duration / distance : 0.0
+    }
+
+    init(id: String, userID: String, distance: Double, duration: Double, type: String, timestamp: Date, calories: Double, averageHeartRate: Int, maxHeartRate: Int, stepsCount: Int, intensity: String, routeImageUrl: String?) {
+        self.id = id
+        self.userID = userID
+        self.distance = distance
+        self.duration = duration
+        self.type = type
+        self.timestamp = timestamp
+        self.calories = calories
+        self.averageHeartRate = averageHeartRate
+        self.maxHeartRate = maxHeartRate
+        self.stepsCount = stepsCount
+        self.intensity = intensity
+        self.routeImageUrl = routeImageUrl
+    }
+
+    // Initialize from Firestore data
+    init(data: [String: Any]) {
+        self.id = data["id"] as? String ?? UUID().uuidString
+        self.userID = data["userId"] as? String ?? ""
+        self.distance = data["distance"] as? Double ?? 0.0
+        self.duration = data["duration"] as? Double ?? 0.0
+        self.type = data["type"] as? String ?? ""
+        self.timestamp = (data["timestamp"] as? Timestamp)?.dateValue() ?? Date()
+        self.calories = data["calories"] as? Double ?? 0.0
+        self.averageHeartRate = data["averageHeartRate"] as? Int ?? 0
+        self.maxHeartRate = data["maxHeartRate"] as? Int ?? 0
+        self.stepsCount = data["stepsCount"] as? Int ?? 0
+        self.intensity = data["intensity"] as? String ?? ""
+        self.routeImageUrl = data["routeImageUrl"] as? String
+    }
 }
+
+
 
 struct AlertItem: Identifiable {
     let id = UUID()

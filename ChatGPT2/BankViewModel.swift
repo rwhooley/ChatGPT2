@@ -15,9 +15,10 @@ import StripePaymentSheet
 
 struct Investment: Identifiable {
     let id: String
-    let month: String
-    let year: String
+    let month: String?
+    let year: String?
     let amount: Double
+    let contestId: String?
 }
 
 class BankViewModel: ObservableObject {
@@ -32,8 +33,15 @@ class BankViewModel: ObservableObject {
     @Published private(set) var externalAccountLast4: String?
     @Published var stripeAccountStatus: String = "checking"
     @Published var currentInvestments: [Investment] = []
+    @Published var pendingContestInvestments: [Contest] = [] // New state for pending contest investments
+    @Published var pendingTeamInvestments: [Team] = [] // New state for pending team investments
     @Published var activeInvestment: Investment?
-        
+    @Published var contestNames: [String: String] = [:]
+    
+    enum InvestmentType {
+        case contest(Contest)
+        case team(Team)
+    }
 
     
     var userId: String = Auth.auth().currentUser?.uid ?? ""
@@ -43,6 +51,7 @@ class BankViewModel: ObservableObject {
     
     init() {
         checkAuthenticationState()
+        fetchInvestments()
     }
     
     var maskedExternalAccount: String {
@@ -52,38 +61,80 @@ class BankViewModel: ObservableObject {
     
     // Fetch investment data from Firebase
     func fetchInvestments() {
-        guard let userId = Auth.auth().currentUser?.uid else { return }
+            guard let userId = Auth.auth().currentUser?.uid else { return }
 
-        let investmentsRef = db.collection("Investments").whereField("userId", isEqualTo: userId)
+            let investmentsRef = db.collection("Investments").whereField("userId", isEqualTo: userId)
 
-        investmentsRef.getDocuments { [weak self] (querySnapshot, error) in
-            guard let self = self else { return }
+            investmentsRef.getDocuments { [weak self] (querySnapshot, error) in
+                guard let self = self else { return }
 
-            if let error = error {
-                print("Error fetching investments: \(error.localizedDescription)")
-                return
-            }
-
-            guard let documents = querySnapshot?.documents else {
-                print("No documents found")
-                return
-            }
-
-            let fetchedInvestments = documents.compactMap { document -> Investment? in
-                let data = document.data()
-                guard let month = data["month"] as? String,
-                      let amount = data["amount"] as? Double else {
-                    return nil
+                if let error = error {
+                    print("Error fetching investments: \(error.localizedDescription)")
+                    return
                 }
-                return Investment(id: document.documentID, month: month, year: "", amount: amount)
-            }
 
-            DispatchQueue.main.async {
-                self.currentInvestments = fetchedInvestments
+                guard let documents = querySnapshot?.documents else {
+                    print("No documents found")
+                    return
+                }
+
+                let fetchedInvestments = documents.compactMap { document -> Investment? in
+                    let data = document.data()
+                    guard let amount = data["amount"] as? Double else { return nil }
+                    let month = data["month"] as? String
+                    let contestId = data["contestId"] as? String
+                    return Investment(id: document.documentID, month: month, year: "", amount: amount, contestId: contestId)
+                }
+
+                DispatchQueue.main.async {
+                    self.currentInvestments = fetchedInvestments
+                    self.fetchContestNamesIfNeeded()
+                }
             }
         }
-    }
 
+        // Fetch contest names for investments with contestIds
+        private func fetchContestNamesIfNeeded() {
+            let contestIds = currentInvestments.compactMap { $0.contestId }
+
+            for contestId in contestIds {
+                if contestNames[contestId] == nil {
+                    // Fetch contest name if not already cached
+                    fetchContestName(for: contestId)
+                }
+            }
+        }
+
+        // Fetch contest name for a specific contestId
+        private func fetchContestName(for contestId: String) {
+            let contestRef = db.collection("contests").document(contestId)
+            contestRef.getDocument { [weak self] document, error in
+                guard let self = self else { return }
+
+                if let error = error {
+                    print("Error fetching contest name: \(error)")
+                    self.contestNames[contestId] = "Unknown Contest"
+                    return
+                }
+
+                if let contestData = document?.data(),
+                   let contestName = contestData["name"] as? String {
+                    DispatchQueue.main.async {
+                        self.contestNames[contestId] = contestName
+                    }
+                } else {
+                    DispatchQueue.main.async {
+                        self.contestNames[contestId] = "Unknown Contest"
+                    }
+                }
+            }
+        }
+
+        // Safely fetch the contest name
+        func getContestName(for contestId: String) -> String {
+            return contestNames[contestId] ?? "Fetching..."
+        }
+    
     
     func fetchCurrentMonthInvestment(completion: @escaping (Investment?) -> Void) {
         let dateFormatter = DateFormatter()
@@ -107,14 +158,18 @@ class BankViewModel: ObservableObject {
 
                 if let document = documents.first {
                     let investmentData = document.data()
-                    
+
                     if let amount = investmentData["amount"] as? Double {
+                        let contestId = investmentData["contestId"] as? String
+                        
                         let investment = Investment(
                             id: document.documentID, // Use the document ID as the unique ID
                             month: currentMonthYear,
                             year: String(currentMonthYear.suffix(4)),
-                            amount: amount
+                            amount: amount,
+                            contestId: contestId // This will handle both nil and valid contestIds
                         )
+
                         self.activeInvestment = investment
                         completion(investment)
                     } else {
@@ -123,9 +178,47 @@ class BankViewModel: ObservableObject {
                 } else {
                     completion(nil)
                 }
+
             }
     }
 
+    @MainActor
+    func fetchPendingInvestments() async {
+        guard let userEmail = Auth.auth().currentUser?.email else {
+            print("User not logged in")
+            return
+        }
+
+        do {
+            let db = Firestore.firestore()
+
+            // Fetch pending contests
+            let contestSnapshot = try await db.collection("contests")
+                .whereField("members", arrayContains: userEmail)
+                .whereField("status", isEqualTo: "Pending")
+                .getDocuments()
+
+            pendingContestInvestments = contestSnapshot.documents.compactMap {
+                Contest(id: $0.documentID, data: $0.data())
+            }
+
+            // Fetch pending teams (assuming they are stored in a similar structure)
+            let teamSnapshot = try await db.collection("teams")
+                .whereField("members", arrayContains: userEmail)
+                .whereField("status", isEqualTo: "Pending")
+                .getDocuments()
+
+            pendingTeamInvestments = teamSnapshot.documents.compactMap {
+                Team(id: $0.documentID, data: $0.data())
+            }
+
+        } catch {
+            print("Error fetching investments: \(error.localizedDescription)")
+        }
+    }
+
+    
+    
     
     func createPaymentIntent(amount: Double, completion: @escaping (String?, Error?) -> Void) {
         functions.httpsCallable("createPaymentIntent").call(["amount": amount]) { result, error in
@@ -183,6 +276,46 @@ class BankViewModel: ObservableObject {
         }
     }
 
+    // Add decline function
+       func declinePendingInvestment(investment: InvestmentType, completion: @escaping (Bool) -> Void) {
+           switch investment {
+           case .contest(let contest):
+               // Handle contest decline logic
+               declineContestInvestment(contest: contest, completion: completion)
+           case .team(let team):
+               // Handle team decline logic
+               declineTeamInvestment(team: team, completion: completion)
+           }
+       }
+
+       private func declineContestInvestment(contest: Contest, completion: @escaping (Bool) -> Void) {
+           let db = Firestore.firestore()
+           let contestRef = db.collection("contests").document(contest.id)
+
+           contestRef.updateData(["investmentStatus": "Declined"]) { error in
+               if let error = error {
+                   print("Error declining contest: \(error)")
+                   completion(false)
+               } else {
+                   completion(true)
+               }
+           }
+       }
+
+       private func declineTeamInvestment(team: Team, completion: @escaping (Bool) -> Void) {
+           let db = Firestore.firestore()
+           let teamRef = db.collection("teams").document(team.id)
+
+           teamRef.updateData(["investmentStatus": "Declined"]) { error in
+               if let error = error {
+                   print("Error declining team: \(error)")
+                   completion(false)
+               } else {
+                   completion(true)
+               }
+           }
+       }
+    
     private func updateBalancesAfterInvestment(amount: Double, completion: @escaping (Bool) -> Void) {
         let userRef = db.collection("users").document(userId)
         
@@ -603,7 +736,42 @@ class BankViewModel: ObservableObject {
             }
         }
     }
+    
+//    func getContestName(for contestId: String) -> String {
+//        if let cachedName = contestNames[contestId] {
+//            return cachedName
+//        } else {
+//            // Temporarily set a placeholder value in contestNames to trigger a re-render
+//            contestNames[contestId] = "Loading..."
+//            
+//            // Fetch contest name from Firestore asynchronously
+//            let contestRef = Firestore.firestore().collection("contests").document(contestId)
+//            contestRef.getDocument { document, error in
+//                if let error = error {
+//                    print("Error fetching contest name: \(error)")
+//                    self.contestNames[contestId] = "Unknown Contest"
+//                    return
+//                }
+//                
+//                if let contestData = document?.data(),
+//                   let contestName = contestData["name"] as? String {
+//                    DispatchQueue.main.async {
+//                        self.contestNames[contestId] = contestName
+//                    }
+//                } else {
+//                    DispatchQueue.main.async {
+//                        self.contestNames[contestId] = "Unknown Contest"
+//                    }
+//                }
+//            }
+//            
+//            return contestNames[contestId] ?? "Unknown Contest" // Return placeholder or final result
+//        }
+//    }
+
 }
+
+
 
 struct CheckStripeAccountResponse {
     let status: String
