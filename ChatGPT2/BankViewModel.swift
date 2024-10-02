@@ -15,10 +15,15 @@ import StripePaymentSheet
 
 struct Investment: Identifiable {
     let id: String
-    let month: String?
-    let year: String?
     let amount: Double
     let contestId: String?
+    let month: String?
+    let timestamp: Date?
+    let userId: String?
+    let status: String
+    let workoutCount: Int // Total number of workouts associated with the investment
+    let bonusRate: Double // Bonus percentage (0%, 10%, 20%, 25%, etc.)
+    let bonusSquares: Int // Number of bonus squares
 }
 
 class BankViewModel: ObservableObject {
@@ -37,6 +42,17 @@ class BankViewModel: ObservableObject {
     @Published var pendingTeamInvestments: [Team] = [] // New state for pending team investments
     @Published var activeInvestment: Investment?
     @Published var contestNames: [String: String] = [:]
+    @Published var activeContestInvestments: [Contest] = [] // For active contests
+    @Published var activeTeamInvestments: [Team] = []
+    @Published var activePersonalInvestments: [Investment] = []
+    
+    @StateObject private var viewModel = BankViewModel()
+
+    
+    
+    
+    private var contestCache: [String: Contest] = [:]
+      
     
     enum InvestmentType {
         case contest(Contest)
@@ -52,6 +68,9 @@ class BankViewModel: ObservableObject {
     init() {
         checkAuthenticationState()
         fetchInvestments()
+        fetchActiveInvestments()
+        fetchCurrentInvestments()
+        
     }
     
     var maskedExternalAccount: String {
@@ -59,40 +78,338 @@ class BankViewModel: ObservableObject {
         return "*\(last4)"
     }
     
-    // Fetch investment data from Firebase
+    // Fetch active investment data from Firebase
     func fetchInvestments() {
-            guard let userId = Auth.auth().currentUser?.uid else { return }
+        guard !userId.isEmpty else {
+            print("No userId found")
+            return
+        }
 
-            let investmentsRef = db.collection("Investments").whereField("userId", isEqualTo: userId)
+        print("Fetching investments for userId: \(userId)")
 
-            investmentsRef.getDocuments { [weak self] (querySnapshot, error) in
+        let db = Firestore.firestore()
+        let currentMonthYear = getCurrentMonthYear()
+        print("Formatted currentMonthYear: \(currentMonthYear)")
+
+        // Fetch investments where the "month" matches the current month
+        db.collection("Investments")
+            .whereField("userId", isEqualTo: userId)
+            .whereField("month", isGreaterThanOrEqualTo: currentMonthYear)
+            .getDocuments { [weak self] (querySnapshot, err) in
+                if let err = err {
+                    print("Error getting documents: \(err)")
+                } else {
+                    self?.currentInvestments = querySnapshot?.documents.compactMap { document -> Investment? in
+                        let data = document.data()
+
+                        // Extract all necessary fields from Firestore document
+                        return Investment(
+                            id: document.documentID,
+                            amount: data["amount"] as? Double ?? 0,
+                            contestId: data["contestId"] as? String,
+                            month: data["month"] as? String,
+                            timestamp: (data["timestamp"] as? Timestamp)?.dateValue(),
+                            userId: data["userId"] as? String,
+                            status: data["status"] as? String ?? "Active",
+                            workoutCount: data["workoutCount"] as? Int ?? 0, // Add this field
+                            bonusRate: data["bonusRate"] as? Double ?? 0.0, // Add this field
+                            bonusSquares: data["bonusSquares"] as? Int ?? 0 // Add this field
+                        )
+                    } ?? []
+
+                    // Notify the view to update
+                    DispatchQueue.main.async {
+                        self?.objectWillChange.send()
+                    }
+
+                    // Now fetch contest-based investments
+                    // self?.fetchContestInvestments()
+                }
+            }
+    }
+
+
+    // Fetch Active Investments from Firestore
+    func fetchActiveInvestments() {
+            fetchActivePersonalInvestments()
+            fetchActiveContestInvestments()
+        }
+
+    
+    var currentMonthYear: String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MMMM yyyy"
+        return formatter.string(from: Date())
+    }
+        
+    func getCurrentMonthYear() -> String {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "MMMM yyyy"
+        let result = dateFormatter.string(from: Date())
+        print("getCurrentMonthYear returned: \(result)")
+        return result
+    }
+
+    private func fetchCurrentInvestments() {
+        let db = Firestore.firestore()
+        
+        // Use this to ensure the format is exactly what you expect in Firestore
+        let currentMonthYear = getCurrentMonthYear().trimmingCharacters(in: .whitespacesAndNewlines)
+
+        
+        
+        print("Current month-year: \(currentMonthYear)")
+        
+        // Check the current authenticated user ID
+        let currentUserId = Auth.auth().currentUser?.uid ?? "No user ID"
+        print("User ID: \(currentUserId)")
+        
+        
+        // Fetch investments based on userId and month
+        print("Fetching investments for month: \(currentMonthYear)")
+        
+        db.collection("Investments")
+//            .whereField("userId", isEqualTo: currentUserId)
+//            .whereField("month", isEqualTo: "September 2024")
+            .getDocuments { [weak self] querySnapshot, error in
                 guard let self = self else { return }
-
+                
                 if let error = error {
-                    print("Error fetching investments: \(error.localizedDescription)")
+                    print("Error fetching current investments: \(error)")
                     return
                 }
-
-                guard let documents = querySnapshot?.documents else {
-                    print("No documents found")
-                    return
-                }
-
-                let fetchedInvestments = documents.compactMap { document -> Investment? in
+                
+                // Log the number of documents retrieved
+                let documentCount = querySnapshot?.documents.count ?? 0
+                print("Number of documents retrieved: \(documentCount)")
+                
+                // Process the investment documents
+                let investments = querySnapshot?.documents.compactMap { document -> Investment? in
                     let data = document.data()
-                    guard let amount = data["amount"] as? Double else { return nil }
-                    let month = data["month"] as? String
-                    let contestId = data["contestId"] as? String
-                    return Investment(id: document.documentID, month: month, year: "", amount: amount, contestId: contestId)
+                    
+                    // Log every key-value pair in the document to inspect its structure
+                    data.forEach { key, value in
+                        print("Field: \(key), Value: \(value)")
+                    }
+                    
+                    // Now, try parsing the investment
+                    let investment = Investment(
+                        id: document.documentID,
+                        amount: data["amount"] as? Double ?? 0,
+                        contestId: data["contestId"] as? String,
+                        month: data["month"] as? String,
+                        timestamp: (data["timestamp"] as? Timestamp)?.dateValue(),
+                        userId: data["userId"] as? String,
+                        status: data["status"] as? String ?? "Unknown",
+                        workoutCount: data["workoutCount"] as? Int ?? 0,  // Add workoutCount parsing
+                        bonusRate: data["bonusRate"] as? Double ?? 0,      // Add bonusRate parsing
+                        bonusSquares: data["bonusSquares"] as? Int ?? 0    // Add bonusSquares parsing
+                    )
+
+                    
+                    print("Parsed investment: \(investment)")
+                    return investment
+                } ?? []
+
+                
+                // Log number of investments after parsing
+                print("Number of investments after parsing: \(investments.count)")
+                
+                // Update the UI with the fetched investments
+                DispatchQueue.main.async {
+                    self.currentInvestments = investments
+                    print("Updated currentInvestments. New count: \(self.currentInvestments.count)")
+                    self.objectWillChange.send()
                 }
+            }
+    }
+
+    private func fetchActivePersonalInvestments() {
+        let db = Firestore.firestore()
+        let currentMonthYear = getCurrentMonthYear()
+
+        print("Fetching active personal investments for month: \(currentMonthYear)")
+        print("Current user ID: \(Auth.auth().currentUser?.uid ?? "No user ID")")
+
+        db.collection("Investments")
+            .whereField("userId", isEqualTo: Auth.auth().currentUser?.uid ?? "")
+         
+            .whereField("month", isEqualTo: currentMonthYear)  // Optionally filter by month
+            .getDocuments { [weak self] querySnapshot, error in
+                guard let self = self else {
+                    print("Self is nil, exiting early")
+                    return
+                }
+                
+                if let error = error {
+                    print("Error fetching personal investments: \(error)")
+                    return
+                }
+                
+                guard let querySnapshot = querySnapshot else {
+                    print("QuerySnapshot is nil")
+                    return
+                }
+                
+                let investments = querySnapshot.documents.compactMap { document -> Investment? in
+                    let data = document.data()
+                    print("Processing document ID: \(document.documentID)")
+                    print("Raw document data: \(data)")
+
+                    guard let amount = data["amount"] as? Double else {
+                        print("Failed to parse amount for document \(document.documentID)")
+                        return nil
+                    }
+
+                    let investment = Investment(
+                        id: document.documentID,
+                        amount: data["amount"] as? Double ?? 0,
+                        contestId: data["contestId"] as? String,
+                        month: data["month"] as? String,
+                        timestamp: (data["timestamp"] as? Timestamp)?.dateValue(),
+                        userId: data["userId"] as? String,
+                        status: data["status"] as? String ?? "Unknown",
+                        workoutCount: data["workoutCount"] as? Int ?? 0,  // Add workoutCount parsing
+                        bonusRate: data["bonusRate"] as? Double ?? 0,      // Add bonusRate parsing
+                        bonusSquares: data["bonusSquares"] as? Int ?? 0    // Add bonusSquares parsing
+                    )
+
+
+                    print("Successfully parsed investment: \(investment)")
+                    return investment
+                }
+
+                print("Number of investments after parsing: \(investments.count)")
 
                 DispatchQueue.main.async {
-                    self.currentInvestments = fetchedInvestments
-                    self.fetchContestNamesIfNeeded()
+                    self.activePersonalInvestments = investments
+                    print("Updated activePersonalInvestments. New count: \(self.activePersonalInvestments.count)")
+                    self.objectWillChange.send()
+                }
+            }
+    }
+
+
+        private func fetchActiveContestInvestments() {
+            let db = Firestore.firestore()
+            let currentDate = Date()
+            
+            db.collection("contests")
+                .whereField("members", arrayContains: Auth.auth().currentUser?.email ?? "")
+                .whereField("status", isEqualTo: "Active")
+                .getDocuments { [weak self] querySnapshot, error in
+                    guard let self = self else { return }
+                    
+                    
+                    if let error = error {
+                        print("Error fetching contest investments: \(error)")
+                        return
+                    }
+                    
+                    let contests = querySnapshot?.documents.compactMap { document -> Contest? in
+                        let data = document.data()
+                        let contest = Contest(id: document.documentID, data: data)
+                        if currentDate >= contest.startDate && currentDate <= contest.endDate {
+                            return contest
+                        }
+                        return nil
+                    } ?? []
+                    
+                    DispatchQueue.main.async {
+                        self.activeContestInvestments = contests
+                        self.objectWillChange.send()
+                    }
+                }
+        }
+
+    
+    
+    // Fetch investments with contestId and check contest status and date range
+    private func fetchContestInvestments(contestsToFetch: [String: Investment], currentDate: Date) {
+        let db = Firestore.firestore()
+        let group = DispatchGroup()
+        var activeContestInvestments: [Contest] = []
+
+        for (contestId, _) in contestsToFetch {
+            group.enter()
+            db.collection("contests").document(contestId).getDocument { documentSnapshot, error in
+                defer { group.leave() }
+                
+                if let error = error {
+                    print("Error fetching contest \(contestId): \(error)")
+                    return
+                }
+                
+                guard let data = documentSnapshot?.data() else {
+                    print("No data found for contest \(contestId)")
+                    return
+                }
+                
+                let contest = Contest(id: contestId, data: data)
+                print("Fetched contest: \(contest.contestName), Status: \(contest.status)")
+                
+                let isUserMember = contest.members.contains(where: { $0.lowercased() == self.userId.lowercased() })
+                let isDateInRange = currentDate >= contest.startDate && currentDate <= contest.endDate
+                let isStatusValid = contest.status == "Active" || contest.status == "Pending"
+                
+                if isUserMember && isDateInRange && isStatusValid {
+                    print("Adding contest to active investments: \(contest.contestName)")
+                    activeContestInvestments.append(contest)
+                } else {
+                    print("Contest not added. User member: \(isUserMember), Date in range: \(isDateInRange), Status valid: \(isStatusValid)")
                 }
             }
         }
 
+        group.notify(queue: .main) {
+            print("All contests fetched. Active contests count: \(activeContestInvestments.count)")
+            self.activeContestInvestments = activeContestInvestments
+            print("Updated activeContestInvestments, count: \(self.activeContestInvestments.count)")
+            self.objectWillChange.send()
+        }
+    }
+    
+    // Helper function to fetch contest details
+    // Helper function to fetch contest details
+    func fetchContest(contestId: String, completion: @escaping (Contest?) -> Void) {
+        if let cachedContest = contestCache[contestId] {
+            completion(cachedContest)
+            return
+        }
+        
+        let db = Firestore.firestore()
+        let contestRef = db.collection("contests").document(contestId)
+        
+        // Fetch the contest document using getDocument
+        contestRef.getDocument { documentSnapshot, error in
+            if let error = error {
+                print("Error fetching contest: \(error)")
+                completion(nil)
+                return
+            }
+            
+            // Ensure the document data exists
+            guard let data = documentSnapshot?.data(),
+                          let status = data["status"] as? String,
+                          let startDateTimestamp = data["startDate"] as? Timestamp,
+                          let endDateTimestamp = data["endDate"] as? Timestamp else {
+                        completion(nil)
+                        return
+                    }
+
+            // Initialize the Contest object using your custom initializer
+            let contest = Contest(id: contestId, data: data)
+            completion(contest)
+
+            // Cache the contest
+                    self.contestCache[contestId] = contest
+                    completion(contest)
+            
+        }
+    }
+
+    
+    
         // Fetch contest names for investments with contestIds
         private func fetchContestNamesIfNeeded() {
             let contestIds = currentInvestments.compactMap { $0.contestId }
@@ -131,15 +448,35 @@ class BankViewModel: ObservableObject {
         }
 
         // Safely fetch the contest name
-        func getContestName(for contestId: String) -> String {
-            return contestNames[contestId] ?? "Fetching..."
-        }
-    
+    // Fetch contest name
+       func getContestName(for contestId: String) -> String {
+           return contestNames[contestId] ?? "Fetching..."
+       }
+
+       func getContest(for id: String) async throws -> Contest {
+           if let cachedContest = contestCache[id] {
+               return cachedContest
+           }
+           
+           let contestRef = db.collection("contests").document(id)
+           let document = try await contestRef.getDocument()
+           
+           guard let contestData = document.data() else {
+               throw NSError(domain: "ContestError", code: 0, userInfo: [NSLocalizedDescriptionKey: "Contest document does not exist or is empty"])
+           }
+           
+           let fetchedContest = Contest(id: document.documentID, data: contestData)
+           contestCache[id] = fetchedContest
+           return fetchedContest
+       }
+   
     
     func fetchCurrentMonthInvestment(completion: @escaping (Investment?) -> Void) {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "MMMM yyyy"
-        let currentMonthYear = dateFormatter.string(from: Date())
+        let currentMonthYear = getCurrentMonthYear()
+        print("Formatted currentMonthYear: \(currentMonthYear)")
+
 
         db.collection("Investments")
             .whereField("userId", isEqualTo: Auth.auth().currentUser?.uid ?? "")
@@ -163,11 +500,16 @@ class BankViewModel: ObservableObject {
                         let contestId = investmentData["contestId"] as? String
                         
                         let investment = Investment(
-                            id: document.documentID, // Use the document ID as the unique ID
-                            month: currentMonthYear,
-                            year: String(currentMonthYear.suffix(4)),
+                            id: document.documentID,
                             amount: amount,
-                            contestId: contestId // This will handle both nil and valid contestIds
+                            contestId: contestId,
+                            month: currentMonthYear,
+                            timestamp: (investmentData["timestamp"] as? Timestamp)?.dateValue(),
+                            userId: Auth.auth().currentUser?.uid,
+                            status: investmentData["status"] as? String ?? "Active",
+                            workoutCount: investmentData["workoutCount"] as? Int ?? 0,  // Add workoutCount parsing
+                            bonusRate: investmentData["bonusRate"] as? Double ?? 0,      // Add bonusRate parsing
+                            bonusSquares: investmentData["bonusSquares"] as? Int ?? 0    // Add bonusSquares parsing
                         )
 
                         self.activeInvestment = investment
@@ -425,19 +767,16 @@ class BankViewModel: ObservableObject {
     }
     
     // Fetch user balances
-    func fetchBalances(completion: @escaping (Double, Double, Double, Error?) -> Void) {
-        UserBalanceManager.shared.getUserBalances(userId: self.userId) { total, invested, free, error in
-            if let error = error {
-                print("Error fetching balances: \(error)")
-            } else {
+    func fetchBalances(completion: ((Double, Double, Double, Error?) -> Void)? = nil) {
+            UserBalanceManager.shared.getUserBalances(userId: userId) { [weak self] total, invested, free, error in
                 DispatchQueue.main.async {
-                    self.totalBalance = total
-                    self.investedBalance = invested
-                    self.freeBalance = free
+                    self?.totalBalance = total
+                    self?.investedBalance = invested
+                    self?.freeBalance = free
+                    completion?(total, invested, free, error)
                 }
             }
         }
-    }
     
     // Fetch external account information from Stripe
     func fetchExternalAccountInfo() {

@@ -13,11 +13,13 @@ struct MainTabView: View {
     @State private var showingWorkoutTypeSelection = false
     @State private var showingWorkout = false
     @State private var showingProfile = false
+    @State private var showingHelp = false  // State to show the instructional screens on-demand
     @StateObject private var workoutManager = WorkoutManager()
     @State private var selectedWorkoutType: HKWorkoutActivityType?
     @EnvironmentObject private var appState: AppState
     @EnvironmentObject private var healthKitManager: HealthKitManager
-    
+    @State private var showInstructionalScreens = false  // State to control showing instructional screens on login
+
     var body: some View {
         NavigationView {
             TabView(selection: $selectedTab) {
@@ -50,7 +52,13 @@ struct MainTabView: View {
                     .tag(3)
             }
             .navigationBarTitle(getTitle(for: selectedTab), displayMode: .inline)
-            .navigationBarItems(trailing: profileButton)
+            .navigationBarItems(
+                leading: profileButton,
+                trailing: HStack {
+                    helpButton // Adds the help button to the navigation bar
+                    balanceButton
+                }
+            )
             .overlay(
                 VStack {
                     Spacer()
@@ -71,6 +79,12 @@ struct MainTabView: View {
         }
         .sheet(isPresented: $showingWorkoutTypeSelection) {
             WorkoutTypeSelectionView(isPresented: $showingWorkoutTypeSelection, selectedWorkoutType: $selectedWorkoutType)
+        }
+        .fullScreenCover(isPresented: $showInstructionalScreens) {
+            InstructionalScreensView(showInstructionalScreens: $showInstructionalScreens)
+        }
+        .fullScreenCover(isPresented: $showingHelp) {  // Show instructional screens on '?' button press
+            InstructionalScreensView(showInstructionalScreens: $showingHelp)
         }
         .fullScreenCover(isPresented: $showingWorkout) {
             WorkoutView(workoutManager: workoutManager, isPresented: $showingWorkout)
@@ -96,6 +110,25 @@ struct MainTabView: View {
         }
     }
     
+    private var balanceButton: some View {
+        Text("$\(appState.totalBalance, specifier: "%.2f")")
+            .font(.system(size: 16, weight: .bold))
+            .padding(.horizontal)
+            .background(Color.gray.opacity(0.2))
+            .cornerRadius(8)
+    }
+
+    // Help button to manually trigger the instructional screens
+    private var helpButton: some View {
+        Button(action: {
+            showingHelp = true  // Show instructional screens when '?' is pressed
+        }) {
+            Image(systemName: "questionmark.circle")
+                .font(.system(size: 25))
+                .foregroundColor(.gray)
+        }
+    }
+    
     private func getTitle(for tab: Int) -> String {
         switch tab {
         case 0:
@@ -115,4 +148,5 @@ struct MainTabView: View {
 #Preview {
     MainTabView()
         .environmentObject(HealthKitManager())
+        .environmentObject(AppState())
 }

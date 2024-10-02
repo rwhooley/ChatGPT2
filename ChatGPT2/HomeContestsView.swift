@@ -77,8 +77,7 @@ struct HomeContestsView: View {
     @State private var showingCreateCompetition = false
     
     var body: some View {
-            ScrollView {
-                VStack(spacing: 16) {
+                VStack {
                     if viewModel.isLoading {
                         loadingView
                     } else if let errorMessage = viewModel.errorMessage {
@@ -92,10 +91,10 @@ struct HomeContestsView: View {
                     }
                     
                     createContestButton
-                        .padding(.horizontal)
+                        .padding()
                 }
-                .padding(.vertical)
-            }
+//                .padding(.bottom)
+            
             .background(Color.gray.opacity(0.05).edgesIgnoringSafeArea(.all))
             .navigationTitle("Contests")
             .task {
@@ -129,11 +128,10 @@ struct HomeContestsView: View {
         }
         
     private var activeContestsSection: some View {
-        VStack(alignment: .leading, spacing: 16) {
+        VStack(alignment: .leading, spacing: 20) {
             Text("Active Contests")
                 .font(.title2)
                 .fontWeight(.bold)
-//                .padding(.horizontal, 16)
             
             if viewModel.activeContests.isEmpty {
                 emptyStateView("No active contests. Start one!")
@@ -145,45 +143,48 @@ struct HomeContestsView: View {
             }
         }
     }
-        
-        private var pendingContestsSection: some View {
-            VStack(alignment: .leading, spacing: 16) {
-                sectionHeader("Pending Contests")
-                
-                ForEach(viewModel.pendingContests) { contest in
-                    pendingContestCard(for: contest)
-                }
-            }
-        }
-        
-    private func activeContestCard(for contest: Contest) -> some View {
-            VStack(alignment: .leading, spacing: 0) {
-                CollapsibleContestRow(contest: contest) {
-                    // No decline action for active contests
-                }
-                .padding(.horizontal)
-                .padding(.vertical, 12)
-                .background(Color(UIColor.systemGreen).opacity(0.2))
-                
-                ContestTrackingModule(viewModel: ContestTrackingViewModel(contest: contest))
-                    .padding(.horizontal)
-                    .padding(.vertical, 16)
-                    .background(Color(UIColor.secondarySystemBackground))
-            }
-            .background(Color(UIColor.secondarySystemBackground))
-            .cornerRadius(12)
-        }
 
         
-        private func pendingContestCard(for contest: Contest) -> some View {
-            CollapsibleContestRow(contest: contest) {
-                Task { await viewModel.declineContest(contest) }
+    private var pendingContestsSection: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            sectionHeader("Pending Contests")
+            
+            ForEach(viewModel.pendingContests) { contest in
+                pendingContestCard(for: contest)
             }
-            .padding()
-            .background(Color.yellow.opacity(0.1))
-            .cornerRadius(12)
-            .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
         }
+    }
+
+        
+    private func activeContestCard(for contest: Contest) -> some View {
+        VStack(alignment: .leading, spacing: 0) {
+            CollapsibleContestRow(contest: contest, contests: $viewModel.activeContests) {
+                // No decline action for active contests
+            }
+            .padding(.horizontal)
+            .padding(.vertical, 12)
+            .background(Color(UIColor.systemGreen).opacity(0.2))
+            
+            ContestTrackingModule(viewModel: ContestTrackingViewModel(contest: contest))
+                .padding(.horizontal)
+                .padding(.vertical, 16)
+                .background(Color(UIColor.secondarySystemBackground))
+        }
+        .background(Color(UIColor.secondarySystemBackground))
+        .cornerRadius(12)
+    }
+
+    private func pendingContestCard(for contest: Contest) -> some View {
+        CollapsibleContestRow(contest: contest, contests: $viewModel.pendingContests) {
+            Task { await viewModel.declineContest(contest) }
+        }
+        .padding()
+        .background(Color.yellow.opacity(0.1))
+        .cornerRadius(12)
+        .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
+    }
+
+
         
         
     

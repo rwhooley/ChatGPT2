@@ -34,7 +34,18 @@ struct HomeView: View {
     @State private var userFirstName: String = ""
     
     @State private var greetingDismissed = false
+    
+    @State private var personalPlans: [PersonalPlan] = []
+    
+    @State private var offersDismissed = false
+    @State private var offers: [Offer] = [
+        Offer(name: "Bandit", imageName: "Bandit"),
+        Offer(name: "SoulCycle", imageName: "SoulCycle"),
+        Offer(name: "BK Running Co.", imageName: "BKRunning"),
+        Offer(name: "Peleton", imageName: "Peloton"),
+    ]
 
+    
     
     private var greetingModule: some View {
         let text: String
@@ -48,7 +59,7 @@ struct HomeView: View {
             """
         case .contests:
             text = """
-            Up for a friendly wager to get the competitive juices flowing? Create a workout contest, invite friends to join and invest, then compete to see who can earn the most money from the pot.
+            How about a wager among friends to bring out your competitive side? Create a workout contest, invite friends to join and invest, then compete to see who can earn the most money from the pot.
             """
         case .collaborations:
             text = """
@@ -114,18 +125,49 @@ struct HomeView: View {
 //        case friends = "Friends"
     }
     
+    struct Offer {
+        let name: String
+        let imageName: String
+    }
+    
     var body: some View {
-        VStack(spacing: 0) {
-            
-            
-//            // Investments label
-//                  Text("WORKOUTS")
-//                .font(.headline)
-//                      .padding(.top, 5)
-//                      .padding(.bottom, 5)
-//                      .frame(maxWidth: .infinity, alignment: .center)
-//                      .background(Color.gray.opacity(0.2))
-            
+            VStack(spacing: 0) {
+//                if !offersDismissed {
+//                    // Offers title and dismiss button
+//                    HStack {
+//                        
+//                        Button(action: {
+//                            offersDismissed = true
+//                        }) {
+//                            Image(systemName: "xmark.circle.fill")
+//                                .foregroundColor(.gray)
+//                                .padding(.leading, 20)  // Move button to the left
+//                        }
+//
+//                        Spacer()
+//
+//                        
+//                    }
+//                    .padding(.top, 10)
+//
+//                    // Offers module
+//                    ScrollView(.horizontal, showsIndicators: false) {
+//                        HStack(spacing: 1) {  // Adjust spacing
+//                            ForEach(offers, id: \.name) { offer in
+//                                OfferView(offer: offer.name, imageName: offer.imageName)
+//                            }
+//                        }
+//                        .padding(.horizontal)
+//                    }
+////                    .padding(.top, 10)
+//                    .frame(height: 100)  // Adjust height as needed for the whole offer section
+//                }
+
+//                Text("Workouts")
+//                    .font(.headline)
+//                    .foregroundColor(.primary)
+//                    .frame(alignment: .leading)
+                
             // Segmented Picker (3-way toggle)
                        Picker("Select Section", selection: $selectedSection) {
                            ForEach(HomeSection.allCases, id: \.self) { section in
@@ -134,9 +176,11 @@ struct HomeView: View {
                        }
                        .pickerStyle(SegmentedPickerStyle())
                        .padding(.horizontal)
+                       .padding(.top, 15)
             
             greetingModule
-                .padding()
+                .padding(.horizontal)
+                .padding(.bottom, 8)
                        
                        // Content based on selected section
                        ScrollView {
@@ -147,7 +191,8 @@ struct HomeView: View {
                                        activeInvestment: $activeInvestment,
                                        completedWorkouts: $completedWorkouts,
                                        selectedWorkout: $selectedWorkout,
-                                       showingWorkoutDetail: $showingWorkoutDetail
+                                       showingWorkoutDetail: $showingWorkoutDetail,
+                                       personalPlans: $personalPlans
                                    )
                                case .contests:
                                    HomeContestsView()
@@ -163,8 +208,34 @@ struct HomeView: View {
                        fetchCurrentMonthWorkouts()
                        fetchCurrentMonthInvestment()
                        fetchUserFirstName()
+                       fetchPersonalPlans()
                    }
                }
+    
+    func fetchPersonalPlans() {
+        guard let userId = Auth.auth().currentUser?.uid else { return }
+        
+        Firestore.firestore().collection("Investments")
+            .whereField("userId", isEqualTo: userId)
+            .getDocuments { snapshot, error in
+                if let error = error {
+                    print("Error fetching personal plans: \(error.localizedDescription)")
+                    return
+                }
+                
+                self.personalPlans = snapshot?.documents.compactMap { document in
+                    let data = document.data()
+                    return PersonalPlan(
+                        id: document.documentID,
+                        amount: data["amount"] as? Double ?? 0,
+                        month: data["month"] as? String ?? "",
+                        timestamp: (data["timestamp"] as? Timestamp)?.dateValue() ?? Date(),
+                        userId: data["userId"] as? String ?? ""
+                    )
+                } ?? []
+            }
+    }
+   
     
     private func fetchUserFirstName() {
         guard let userId = Auth.auth().currentUser?.uid else {

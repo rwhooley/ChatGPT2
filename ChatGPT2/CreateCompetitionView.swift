@@ -110,7 +110,8 @@ struct CreateCompetitionView: View {
     var body: some View {
         
         Spacer()
-        Text("Start a competition with friends by entering details below. Compete against your friends to complete workouts and earn money!")
+        Text("Create Contest")
+            .font(.title)
             .padding()
         
         VStack {
@@ -282,7 +283,7 @@ struct CreateCompetitionView: View {
                                         showReviewSheet.toggle()  // Show the review popover
                                     }
                                 }) {
-                    Text("Create Competition")
+                    Text("Create Contest")
                         .fontWeight(.bold)
                         .frame(maxWidth: .infinity)  // Makes the text centered
                         .padding()
@@ -398,7 +399,7 @@ struct CreateCompetitionView: View {
                     let batch = db.batch()
                     
                     for member in self.members {
-                        let investmentRef = contestRef.collection("investments").document(member)
+                        let investmentRef = contestRef.collection("Investments").document(member)
                         let investmentData: [String: Any] = [
                             "userId": member,
                             "email": member,

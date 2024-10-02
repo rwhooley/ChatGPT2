@@ -7,6 +7,8 @@ struct ContestTrackingModule: View {
     @StateObject var viewModel: ContestTrackingViewModel
     @State private var isExpanded = false
 
+    let columns: [GridItem] = Array(repeating: .init(.flexible()), count: 5)
+    
     var body: some View {
         VStack(alignment: .center, spacing: 20) {
             if viewModel.isLoading {
@@ -21,11 +23,13 @@ struct ContestTrackingModule: View {
                     let firstName = viewModel.userNames[userEmail] ?? "User"
                     HStack {
                         Text(firstName)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .font(.system(size: 16, weight: .bold))
-                            .padding(.trailing, 10)
+                                            .font(.system(size: 16, weight: .bold))
+                                            .frame(maxWidth: .infinity, alignment: .leading)
+                                            .padding(.trailing, 10)
+                                            .layoutPriority(1)
 
                         workoutProgressGrid(for: userEmail)
+                            .frame(maxWidth: UIScreen.main.bounds.width * 0.5)
                     }
                 }
 
@@ -134,24 +138,54 @@ struct ContestTrackingModule: View {
         }
     }
 
+    // Dynamically calculate the number of columns and adjust the size of the squares
     private func workoutProgressGrid(for userEmail: String) -> some View {
-        HStack(spacing: 6) {
-            let completedWorkouts = viewModel.getQualifyingWorkoutsCount(for: userEmail)
-            ForEach(0..<viewModel.contest.numberOfWorkouts, id: \.self) { index in
-                ZStack {
-                    RoundedRectangle(cornerRadius: 5)
-                        .fill(index < completedWorkouts ? Color.green : Color.gray.opacity(0.3))
-                        .frame(width: 24, height: 24)
+        let completedWorkouts = viewModel.getQualifyingWorkoutsCount(for: userEmail)
+        let totalWorkouts = viewModel.contest.numberOfWorkouts
 
-                    if index < completedWorkouts {
-                        Text("✔️")
-                            .font(.caption)
-                            .foregroundColor(.white)
+        // Dynamically calculate available width after leaving space for the name label
+        let availableWidth = UIScreen.main.bounds.width * 0.5  // Assign 60% of the screen width to the progress grid
+        let squareSpacing: CGFloat = 6  // Spacing between squares
+        let minSquareSize: CGFloat = 18  // Minimum size for squares
+
+        // Calculate number of squares in one row based on available width
+        let maxColumns = Int(availableWidth / (minSquareSize + squareSpacing))
+        let columns = min(maxColumns, totalWorkouts)
+
+        // Calculate the square size dynamically
+        let squareSize = (availableWidth - CGFloat(columns - 1) * squareSpacing) / CGFloat(columns)
+
+        // Calculate the number of rows required
+        let rows = Int(ceil(Double(totalWorkouts) / Double(columns)))
+
+        return VStack(spacing: squareSpacing) {
+            ForEach(0..<rows, id: \.self) { row in
+                HStack(spacing: squareSpacing) {
+                    ForEach(0..<columns, id: \.self) { column in
+                        let index = row * columns + column
+                        if index < totalWorkouts {
+                            ZStack {
+                                RoundedRectangle(cornerRadius: 6)
+                                    .fill(index < completedWorkouts ? Color.green : Color.gray.opacity(0.3))
+                                    .frame(width: squareSize, height: squareSize)
+
+                                if index < completedWorkouts {
+                                    Text("✔️")
+                                        .font(.caption)
+                                        .foregroundColor(.white)
+                                }
+                            }
+                        } else {
+                            Spacer().frame(width: squareSize, height: squareSize)
+                        }
                     }
                 }
             }
         }
     }
+
+   
+
 
     private var dateFormatter: DateFormatter {
         let formatter = DateFormatter()
@@ -169,7 +203,22 @@ struct ContestTrackingModule: View {
 }
 
 
-
+// ProgressBox can be a simple box showing progress
+struct ProgressBox: View {
+    let index: Int
+    
+    var body: some View {
+        ZStack {
+            RoundedRectangle(cornerRadius: 8)
+                .fill(Color.green.opacity(0.8))
+                .frame(width: 50, height: 50)
+            
+            Text("\(index + 1)")
+                .font(.headline)
+                .foregroundColor(.white)
+        }
+    }
+}
 
 
 class ContestTrackingViewModel: ObservableObject {

@@ -35,6 +35,8 @@ struct BankView: View {
     @State private var showingInvestmentMenu = false
     @State private var selectedMonth = ""
     @State private var showInvestmentDetails = false
+    @State private var showCreatePersonalInvestment = false
+    @State private var showCreateCompetition = false
     @State private var totalBalance: Double = 0
     @State private var investedBalance: Double = 0
     @State private var freeBalance: Double = 0
@@ -46,6 +48,8 @@ struct BankView: View {
     @State private var isShowingInvestmentDetail = false
     @State private var selectedInvestment: InvestmentType?
     @State private var selectedTab: TabType = .investments // Enum to handle tab selection
+    
+    @State private var activeInvestment: Investment?
     
     init(pendingContestInvestment: Contest? = nil) {
         _pendingContestInvestment = State(initialValue: pendingContestInvestment)
@@ -75,62 +79,67 @@ struct BankView: View {
     }
 
     var body: some View {
-        NavigationView {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 20) {
-                    balanceModule
+            NavigationView {
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 20) {
+                        balanceModule
+
+                        Spacer()
+                        
+                        segmentedControl
+
+                        if selectedTab == .investments {
+                            investmentsSection
+                        } else {
+                            transactionsSection
+                        }
+                    }
+                    .padding()
+                }
+                .navigationBarHidden(false)
+                .onAppear {
+                    viewModel.fetchActiveInvestments()
+                    setupBalanceListener()
+                    viewModel.fetchBalances { totalBalance, investedBalance, freeBalance, error in
+                        if let error = error {
+                            print("Error fetching balances: \(error)")
+                            return
+                        }
+                        DispatchQueue.main.async {
+                            self.totalBalance = totalBalance
+                            self.investedBalance = investedBalance
+                            self.freeBalance = freeBalance
+                        }
+                    }
+                    viewModel.fetchExternalAccountInfo()
+                    viewModel.checkAccountStatus { _ in }
                     
-//                    stripeAccountStatusView
-                    
-                    Spacer()
-                    
-                    // 2-way selector for Investments/Transactions
-                    segmentedControl
-                    
-                    // Show content based on the selected tab
-                    if selectedTab == .investments {
-                        investmentsSection
-                    } else {
-                        transactionsSection
+                    Task {
+                        await viewModel.fetchPendingInvestments()
                     }
                 }
-                .padding()
-            }
-            .navigationBarHidden(false)
-            .onAppear {
-                viewModel.fetchInvestments()
-                setupBalanceListener()
-                viewModel.fetchBalances { totalBalance, investedBalance, freeBalance, error in
-                    if let error = error {
-                        print("Error fetching balances: \(error)")
-                        return
-                    }
-                    DispatchQueue.main.async {
-                        self.totalBalance = totalBalance
-                        self.investedBalance = investedBalance
-                        self.freeBalance = freeBalance
+                .onDisappear {
+                    balanceListener?.remove()
+                }
+                .alert(isPresented: $showingAlert) {
+                    Alert(title: Text("Notice"), message: Text(alertMessage), dismissButton: .default(Text("OK")))
+                }
+                .sheet(isPresented: $showingSafari) {
+                    if let url = safariURL {
+                        SafariView(url: url)
                     }
                 }
-                viewModel.fetchExternalAccountInfo()
-                viewModel.checkAccountStatus { _ in }
-                
-                Task {
-                    await viewModel.fetchPendingInvestments()
+                .sheet(isPresented: $showCreatePersonalInvestment) {
+                    CreatePersonalInvestmentView()
                 }
-            }
-            .onDisappear {
-                balanceListener?.remove()
-            }
-            .alert(isPresented: $showingAlert) {
-                Alert(title: Text("Notice"), message: Text(alertMessage), dismissButton: .default(Text("OK")))
-            }
-            .sheet(isPresented: $showingSafari) {
-                if let url = safariURL {
-                    SafariView(url: url)
+
+                .sheet(isPresented: $showCreateCompetition) {
+                    CreateCompetitionView()
                 }
+
+
             }
         }
-    }
 
     // Balance Module Section
     var balanceModule: some View {
@@ -200,36 +209,97 @@ struct BankView: View {
         .padding()
     }
 
+    struct ActiveInvestmentRow: View {
+        let name: String
+        let amount: Double
+        let action: () -> Void
         
+        var body: some View {
+            HStack {
+                VStack(alignment: .leading) {
+                    Text(name)
+                        .font(.headline)
+                    Text(String(format: "$%.2f", amount))
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                }
+                Spacer()
+                Button(action: action) {
+                    Text("View")
+                        .foregroundColor(.blue)
+                }
+            }
+            .padding()
+            .background(RoundedRectangle(cornerRadius: 10).fill(Color.white))
+            .shadow(radius: 2)
+        }
+    }
+
     
     var investmentsSection: some View {
         VStack(alignment: .leading, spacing: 8) {
-            
             // Active Investments Subsection
             VStack(alignment: .leading, spacing: 8) {
-                Text("Active Investments")
-                    .font(.headline)
-                    .fontWeight(.semibold)
-                
-                if viewModel.currentInvestments.isEmpty {
-                    Text("No active investments")
-                        .foregroundColor(.secondary)
-                } else {
-                    ForEach(viewModel.currentInvestments, id: \.id) { investment in
-                        HStack {
-                            if let month = investment.month {
-                                Text(month)
-                            } else if let contestId = investment.contestId {
-                                // Fetch the contest name if contestId is present
-                                Text(viewModel.getContestName(for: contestId))
+                    Text("Active Investments")
+                        .font(.headline)
+                        .fontWeight(.semibold)
+
+                if viewModel.activePersonalInvestments.isEmpty && viewModel.activeContestInvestments.isEmpty {
+                           Text("No active investments")
+                               .foregroundColor(.secondary)
+                       } else {
+                           if !viewModel.activePersonalInvestments.isEmpty {
+                               Text("Personal Investments")
+                                   .font(.subheadline)
+                                   .fontWeight(.medium)
+                               ForEach(viewModel.activePersonalInvestments) { investment in
+                                   CollapsiblePersonalPlanView(personalPlan: PersonalPlan(
+                                       id: investment.id,
+                                       amount: investment.amount,
+                                       month: investment.month ?? "Unknown",
+                                       timestamp: investment.timestamp ?? Date(),
+                                       userId: investment.userId ?? ""
+                                   ))
+                                   .padding(.vertical, 4)
+                               }
+                           }
+
+                        if !viewModel.activeContestInvestments.isEmpty {
+                                        Text("Contest Investments")
+                                            .font(.subheadline)
+                                            .fontWeight(.medium)
+                                        ForEach(viewModel.activeContestInvestments) { contest in
+                                            CollapsibleContestRow(contest: contest, contests: $viewModel.activeContestInvestments) {
+                                    selectedInvestment = .contest(contest)
+                                    isShowingInvestmentDetail = true
+                                }
                             }
-                            Spacer()
-                            Text("$\(investment.amount, specifier: "%.2f")")
                         }
-                        .font(.subheadline)
+                    }
+                }
+
+//            .padding()
+//            .background(RoundedRectangle(cornerRadius: 15).fill(Color.gray.opacity(0.15)))
+            .cornerRadius(10)
+            .sheet(isPresented: $isShowingInvestmentDetail) {
+                if let selectedInvestment = selectedInvestment {
+                    switch selectedInvestment {
+                    case .contest(let contest):
+                        InvestmentDetailView(investment: .contest(contest), onInvest: {
+                            // Optional: Any interaction for active contests
+                        }, onDecline: {
+                            // Optional: Decline or close an active investment (if needed)
+                        })
+                    case .team(let team):
+                        InvestmentDetailView(investment: .team(team), onInvest: {
+                            // Optional: Any interaction for active teams
+                        }, onDecline: {
+                            // Optional: Decline or close an active investment (if needed)
+                        })
                     }
                 }
             }
+
 
             Divider()
 
@@ -248,7 +318,7 @@ struct BankView: View {
                             .font(.subheadline)
                             .fontWeight(.medium)
                         ForEach(viewModel.pendingContestInvestments, id: \.id) { contest in
-                            CollapsibleContestRow(contest: contest) {
+                            CollapsibleContestRow(contest: contest, contests: $viewModel.activeContestInvestments) {
                                 declinePendingInvestment(.contest(contest))
                             }
                         }
@@ -291,9 +361,61 @@ struct BankView: View {
         }
     }
 
+    struct ContestInvestmentRow: View {
+        let investment: Investment
+        @ObservedObject var viewModel: BankViewModel
+        @State private var contest: Contest?
+        @State private var isLoading = false
+        @State private var errorMessage: String?
+
+        var body: some View {
+            VStack {
+                if isLoading {
+                    ProgressView()
+                } else if let contest = contest {
+                    CollapsibleContestRow(contest: contest, contests: $viewModel.activeContestInvestments) {
+                        // No decline action for active investments
+                    }
+                } else if let errorMessage = errorMessage {
+                    Text(errorMessage)
+                        .foregroundColor(.red)
+                }
+            }
+            .onAppear {
+                loadContest()
+            }
+        }
+
+        private func loadContest() {
+            isLoading = true
+            Task {
+                do {
+                    contest = try await viewModel.getContest(for: investment.contestId!)
+                    isLoading = false
+                } catch let error as NSError {
+                    if error.domain == "ContestError" && error.code == 1 {
+                        // Contest is not active
+                        errorMessage = "This contest is no longer active"
+                    } else {
+                        errorMessage = "Failed to load contest: \(error.localizedDescription)"
+                    }
+                    isLoading = false
+                }
+            }
+        }
+    }
 
 
-
+    private func activeInvestmentRow(name: String, amount: Double, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            HStack {
+                Text(name)
+                Spacer()
+                Text("$\(amount, specifier: "%.2f")")
+            }
+            .font(.subheadline)
+        }
+    }
 
     private func pendingInvestmentRow(name: String, amount: Double, action: @escaping () -> Void) -> some View {
         Button(action: action) {
@@ -434,41 +556,36 @@ struct BankView: View {
         }
     
     var investButton: some View {
-        Button(action: {
-            showingInvestmentMenu = true
-        }) {
-            Text("Invest")
-                .font(.body)
-                .foregroundColor(.white)
-                .frame(maxWidth: .infinity, maxHeight: 10)
-                .padding()
-                .background(Color.gray.opacity(0.1))
-                .cornerRadius(10)
+            Button(action: {
+                showingInvestmentMenu = true
+            }) {
+                Text("Invest")
+                    .font(.body)
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity, maxHeight: 10)
+                    .padding()
+                    .background(Color.gray.opacity(0.1))
+                    .cornerRadius(10)
+            }
+            .actionSheet(isPresented: $showingInvestmentMenu) {
+                ActionSheet(title: Text("Investment Options"), buttons: [
+                    .default(Text("Invest in Yourself")) {
+                        showCreatePersonalInvestment = true
+                    },
+                    .default(Text("Invest in a Contest")) {
+                        showCreateCompetition = true
+                    },
+                    .default(Text("Invest in a Team")) {
+                        alertMessage = "This option is not available yet."
+                        showingAlert = true
+                    },
+                    .cancel()
+                ])
+            }
         }
-        .actionSheet(isPresented: $showingInvestmentMenu) {
-            ActionSheet(title: Text("Investment Options"), buttons: [
-                .default(Text("Invest in Yourself")) {
-                    showInvestmentDetails = true
-                },
-                .default(Text("Invest in a Friend")) {
-                    alertMessage = "This option is not available yet."
-                    showingAlert = true
-                },
-                .default(Text("Invest in a Group")) {
-                    alertMessage = "This option is not available yet."
-                    showingAlert = true
-                },
-                .cancel()
-            ])
-        }
-        .sheet(isPresented: $showInvestmentDetails) {
-            InvestmentDetailsView(
-                selectedMonth: $selectedMonth,
-                showInvestmentDetails: $showInvestmentDetails,
-                viewModel: viewModel
-            )
-        }
-    }
+        
+
+    
     
     private func createOrContinueStripeAccount() {
         viewModel.createOrRetrieveStripeAccount { result in
@@ -675,7 +792,7 @@ struct BankView: View {
             
             let db = Firestore.firestore()
             let contestRef = db.collection("contests").document(contest.id)
-            let investmentRef = contestRef.collection("investments").document(userEmail)
+            let investmentRef = contestRef.collection("Investments").document(userEmail)
             
             db.runTransaction({ (transaction, errorPointer) -> Any? in
                 let contestDocument: DocumentSnapshot
@@ -726,7 +843,7 @@ struct BankView: View {
             guard let userEmail = Auth.auth().currentUser?.email else { return }
             
             let db = Firestore.firestore()
-            db.collectionGroup("investments")
+            db.collectionGroup("Investments")
                 .whereField("email", isEqualTo: userEmail)
                 .whereField("investmentStatus", isEqualTo: "Pending")
                 .getDocuments { snapshot, error in

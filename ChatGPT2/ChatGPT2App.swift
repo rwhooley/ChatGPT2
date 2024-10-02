@@ -18,6 +18,7 @@ struct ChatGPT2App: App {
     @StateObject private var bankViewModel = BankViewModel() // Add BankViewModel as a state object
     @StateObject private var alertManager = AlertManager()
     
+    
     // Use UIApplicationDelegateAdaptor to create an AppDelegate in a SwiftUI app
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
 
@@ -39,6 +40,7 @@ struct ChatGPT2App: App {
             }
         }
     }
+
 
 
 // Custom AppDelegate class

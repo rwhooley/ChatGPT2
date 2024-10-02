@@ -45,9 +45,9 @@ struct PerformanceView: View {
                 .padding()
         } else {
             VStack {
-                Text("Workouts fetched: \(currentMonthWorkouts.count)")
-                    .font(.headline)
-                    .foregroundColor(.blue)
+//                Text("Workouts fetched: \(currentMonthWorkouts.count)")
+//                    .font(.headline)
+//                    .foregroundColor(.blue)
 
                 if currentMonthWorkouts.isEmpty {
                     Text("No qualifying workouts found")
@@ -77,8 +77,8 @@ struct PerformanceView: View {
         // Querying from the top-level 'workouts' collection and filtering by 'userId'
         healthKitManager.db.collection("workouts")
             .whereField("userId", isEqualTo: userId)
-            .whereField("date", isGreaterThanOrEqualTo: Timestamp(date: startOfMonth))
-            .whereField("date", isLessThanOrEqualTo: Timestamp(date: endOfMonth))
+//            .whereField("date", isGreaterThanOrEqualTo: Timestamp(date: startOfMonth))
+//            .whereField("date", isLessThanOrEqualTo: Timestamp(date: endOfMonth))
             .getDocuments { (snapshot, error) in
                 if let error = error {
                     self.errorMessage = "Failed to load workouts: \(error.localizedDescription)"
@@ -202,6 +202,7 @@ struct CalendarView: View {
             let calendar = Calendar.current
             let hasWorkout = workouts.contains { calendar.component(.day, from: $0.date) == day }
             return hasWorkout ? .green : Color.gray.opacity(0.3)
+        
         }
     }
     
@@ -230,12 +231,12 @@ struct CurrentMonthModule: View {
                 .font(.title2)
                 .fontWeight(.bold)
 
-            CalendarView(daysInMonth: daysInCurrentMonth, firstDayOfMonth: firstDayOfCurrentMonth, workouts: workouts)
+            CalendarView(daysInMonth: daysInCurrentMonth, firstDayOfMonth: firstDayOfCurrentMonth, workouts: filteredWorkoutsForCurrentMonth)
             
             HStack {
-                StatView(title: "Qualifying Workouts", value: "\(workouts.count)")
-                StatView(title: "Total Miles", value: String(format: "%.1f", totalMiles))
-                StatView(title: "Avg Miles Per Workout", value: String(format: "%.1f", averageMiles))
+                StatView(title: "Qualifying Workouts", value: "\(filteredWorkoutsForCurrentMonth.count)")
+                StatView(title: "Total Miles", value: String(format: "%.1f", totalMilesForCurrentMonth))
+                StatView(title: "Avg Miles Per Workout", value: String(format: "%.1f", averageMilesForCurrentMonth))
             }
         }
         .padding()
@@ -243,6 +244,18 @@ struct CurrentMonthModule: View {
         .cornerRadius(10)
     }
     
+    // Filter workouts that took place in the current month
+    private var filteredWorkoutsForCurrentMonth: [DetailedWorkout] {
+        let calendar = Calendar.current
+        return workouts.filter { workout in
+            let workoutMonth = calendar.component(.month, from: workout.date)
+            let workoutYear = calendar.component(.year, from: workout.date)
+            let currentMonth = calendar.component(.month, from: Date())
+            let currentYear = calendar.component(.year, from: Date())
+            return workoutMonth == currentMonth && workoutYear == currentYear
+        }
+    }
+
     private var daysInCurrentMonth: Int {
         let calendar = Calendar.current
         let range = calendar.range(of: .day, in: .month, for: Date())
@@ -255,14 +268,15 @@ struct CurrentMonthModule: View {
         return calendar.component(.weekday, from: startOfMonth) - 1
     }
 
-    private var totalMiles: Double {
-        workouts.reduce(0) { $0 + $1.distance / 1609.34 }
+    private var totalMilesForCurrentMonth: Double {
+        filteredWorkoutsForCurrentMonth.reduce(0) { $0 + $1.distance / 1609.34 }
     }
     
-    private var averageMiles: Double {
-        workouts.isEmpty ? 0 : totalMiles / Double(workouts.count)
+    private var averageMilesForCurrentMonth: Double {
+        filteredWorkoutsForCurrentMonth.isEmpty ? 0 : totalMilesForCurrentMonth / Double(filteredWorkoutsForCurrentMonth.count)
     }
 }
+
 
 struct PastMonthsModule: View {
     let workouts: [DetailedWorkout]
