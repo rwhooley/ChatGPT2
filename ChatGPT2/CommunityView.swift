@@ -131,7 +131,7 @@ struct CommunityView: View {
                     }
                 }
                 // Friends' Workouts Section
-                Section(header: Text("Friends' Workouts").font(.headline)) {
+                Section(header: Text("Friends' Workouts This Month").font(.headline)) {
                     if viewModel.workouts.isEmpty {
                         Text("No workouts available")
                             .foregroundColor(.gray)

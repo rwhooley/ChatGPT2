@@ -155,7 +155,7 @@ struct ScreenTwoView: View {
                     Text("4. Connect Antelope to Apple Health")
                         .font(.headline)
 
-                    Text("Connect your Antelope app to Apple Health in your profile so that we can track your workouts and progress. Test the connection (will add a test button for users to pull in most recent Running or Cycling workout to ensure connection is working properly.")
+                    Text("Connect your Antelope app to Apple Health in your profile so that we can track your workouts and progress. Test the connection by tapping Reset Sync button. When you do this, old workouts should become visible in your Performance section.")
                         .font(.footnote)
                 }
                 .padding()

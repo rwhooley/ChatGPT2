@@ -12,11 +12,28 @@ struct HomeTeamsView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
-            Text("Teams coming soon!")
-                .font(.title2)
-                .fontWeight(.bold)
-                
+            HStack {
+                Text("Team Investments")
+                    .font(.title2)
+                    .fontWeight(.bold)
+             Spacer()
+            }
             
+            HStack {
+                Text("Coming soon!")
+                    .font(.body)
+                    
+             Spacer()
+            }
+            
+            Spacer()
+            
+            Image("mightyducks")
+                .resizable()
+                .scaledToFill()
+                .frame()
+            
+            Spacer()
 //            if activeTeams.isEmpty {
 //                Text("No active teams.")
 //                    .foregroundColor(.gray)
