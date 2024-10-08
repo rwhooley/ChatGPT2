@@ -10,133 +10,138 @@ struct ContestTrackingModule: View {
     let columns: [GridItem] = Array(repeating: .init(.flexible()), count: 5)
     
     var body: some View {
-        VStack(alignment: .center, spacing: 20) {
-            if viewModel.isLoading {
-                ProgressView("Loading contest data...")
-            } else if let error = viewModel.errorMessage {
-                Text(error)
-                    .foregroundColor(.red)
-                    .padding()
-            } else {
-                // Show the user progress grid
-                ForEach(viewModel.contest.members, id: \.self) { userEmail in
-                    let firstName = viewModel.userNames[userEmail] ?? "User"
-                    HStack {
-                        Text(firstName)
-                                            .font(.system(size: 16, weight: .bold))
-                                            .frame(maxWidth: .infinity, alignment: .leading)
-                                            .padding(.trailing, 10)
-                                            .layoutPriority(1)
+            VStack(alignment: .center, spacing: 20) {
+                if viewModel.isLoading {
+                    ProgressView("Loading contest data...")
+                } else if let error = viewModel.errorMessage {
+                    Text(error)
+                        .foregroundColor(.red)
+                        .padding()
+                } else {
+                    // Show the user progress grid
+                    ForEach(viewModel.contest.members, id: \.self) { userEmail in
+                        let firstName = viewModel.userNames[userEmail] ?? "User"
+                        HStack {
+                            Text(firstName)
+                                .font(.system(size: 16, weight: .bold))
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .padding(.trailing, 10)
+                                .layoutPriority(1)
 
-                        workoutProgressGrid(for: userEmail)
-                            .frame(maxWidth: UIScreen.main.bounds.width * 0.5)
+                            workoutProgressGrid(for: userEmail)
+                                .frame(maxWidth: UIScreen.main.bounds.width * 0.5)
+                        }
                     }
-                }
 
-                // Toggle to collapse or expand detailed workouts
-                Button(action: {
-                    withAnimation {
-                        isExpanded.toggle()
+                    // Toggle to collapse or expand detailed workouts
+                    Button(action: {
+                        withAnimation {
+                            isExpanded.toggle()
+                        }
+                    }) {
+                        HStack {
+                            Text(isExpanded ? "Hide Workouts" : "Show Workouts")
+                                .foregroundColor(.white)
+                                
+                            Spacer()
+                            Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
+                                .foregroundColor(.white)
+                        }
+                        .padding()
+                        .background(Color.gray.opacity(0.2))
+                        .cornerRadius(8)
                     }
-                }) {
-                    HStack {
-                        Text(isExpanded ? "Hide Workouts" : "Show Workouts")
-                            .foregroundColor(.white)
-                            
-                        Spacer()
-                        Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
-                            .foregroundColor(.white)
-                    }
-                    .padding()
-                    .background(Color.gray.opacity(0.2))
-                    .cornerRadius(8)
-                }
 
-                if isExpanded {
-                    // Display detailed workouts
-                    if !viewModel.detailedWorkouts.isEmpty {
-                        ForEach(viewModel.detailedWorkouts) { workout in
-                            VStack(alignment: .leading, spacing: 10) {
-                                HStack {
-                                    if let profileUrl = workout.userProfilePictureUrl {
-                                        // Assuming an async image loader is available
-                                        AsyncImage(url: URL(string: profileUrl)) { image in
-                                            image.resizable()
-                                                .scaledToFit()
-                                                .frame(width: 40, height: 40)
-                                                .clipShape(Circle())
-                                        } placeholder: {
-                                            Circle()
-                                                .fill(Color.gray)
-                                                .frame(width: 40, height: 40)
+                    if isExpanded {
+                        // Display detailed workouts
+                        if !viewModel.detailedWorkouts.isEmpty {
+                            ForEach(viewModel.detailedWorkouts) { workout in
+                                VStack(alignment: .leading, spacing: 10) {
+                                    HStack {
+                                        if let profileUrl = workout.userProfilePictureUrl {
+                                            AsyncImage(url: URL(string: profileUrl)) { image in
+                                                image.resizable()
+                                                    .scaledToFit()
+                                                    .frame(width: 40, height: 40)
+                                                    .clipShape(Circle())
+                                            } placeholder: {
+                                                Circle()
+                                                    .fill(Color.gray)
+                                                    .frame(width: 40, height: 40)
+                                            }
+                                        }
+                                        VStack(alignment: .leading) {
+                                            Text("\(workout.userFirstName) \(workout.userLastName)")
+                                                .font(.headline)
+                                            Text("Date: \(workout.date, formatter: dateFormatter)")
                                         }
                                     }
-                                    VStack(alignment: .leading) {
-                                        Text("\(workout.userFirstName) \(workout.userLastName)")
+                                    .padding(.bottom, 5)
+
+                                    HStack {
+                                                                        // Normalize distance to miles if necessary
+                                                                        let distanceInMiles = workout.distance / 1609.34 // Assuming distance is in meters
+                                                                        Text("Distance: \(distanceInMiles, specifier: "%.2f") miles")
+                                                                        Spacer()
+
+                                                                        // Normalize pace to minutes per mile
+                                                                        if let paceInSeconds = workout.pace {
+                                                                            let paceInMinutes = paceInSeconds / 60
+                                                                            Text("Pace: \(paceInMinutes, specifier: "%.2f") min/mile")
+                                                                        }
+                                    }
+
+                                    HStack {
+                                        Text("Duration: \(formatDuration(workout.duration))")
+                                        Spacer()
+                                        if let avgHR = workout.averageHeartRate {
+                                            Text("Avg HR: \(avgHR, specifier: "%.0f") bpm")
+                                        }
+                                        if let maxHR = workout.maxHeartRate {
+                                            Text("Max HR: \(maxHR, specifier: "%.0f") bpm")
+                                        }
+                                    }
+
+                                    if let steps = workout.stepsCount {
+                                        Text("Steps: \(steps, specifier: "%.0f")")
+                                    }
+
+                                    if let routeImageUrl = workout.routeImageUrl {
+                                        Text("Route:")
                                             .font(.headline)
-                                        Text("Date: \(workout.date, formatter: dateFormatter)")
+                                        
+                                        AsyncImage(url: URL(string: routeImageUrl)) { image in
+                                            image.resizable()
+                                                .scaledToFit()
+                                                .frame(maxHeight: 200)
+                                                .cornerRadius(8)
+                                        } placeholder: {
+                                            Rectangle()
+                                                .fill(Color.gray.opacity(0.3))
+                                                .frame(maxHeight: 200)
+                                                .cornerRadius(8)
+                                        }
                                     }
                                 }
-                                .padding(.bottom, 5)
-
-                                HStack {
-                                    Text("Distance: \(workout.distance, specifier: "%.2f") miles")
-                                    Spacer()
-                                    Text("Pace: \(workout.pace ?? 0, specifier: "%.2f") min/mile")
-                                }
-
-                                HStack {
-                                    Text("Duration: \(formatDuration(workout.duration))")
-                                    Spacer()
-                                    if let avgHR = workout.averageHeartRate {
-                                        Text("Avg HR: \(avgHR, specifier: "%.0f") bpm")
-                                    }
-                                    if let maxHR = workout.maxHeartRate {
-                                        Text("Max HR: \(maxHR, specifier: "%.0f") bpm")
-                                    }
-                                }
-
-                                if let steps = workout.stepsCount {
-                                    Text("Steps: \(steps, specifier: "%.0f")")
-                                }
-
-                                // Display route map if available
-                                if let routeImageUrl = workout.routeImageUrl {
-                                    Text("Route:")
-                                        .font(.headline)
-                                    
-                                    AsyncImage(url: URL(string: routeImageUrl)) { image in
-                                        image.resizable()
-                                            .scaledToFit()
-                                            .frame(maxHeight: 200)
-                                            .cornerRadius(8)
-                                    } placeholder: {
-                                        Rectangle()
-                                            .fill(Color.gray.opacity(0.3))
-                                            .frame(maxHeight: 200)
-                                            .cornerRadius(8)
-                                    }
-                                }
+                                .padding()
+                                .background(Color.gray.opacity(0.1))
+                                .cornerRadius(8)
                             }
-                            .padding()
-                            .background(Color.gray.opacity(0.1))
-                            .cornerRadius(8)
+                        } else {
+                            Text("No qualifying workouts found.")
+                                .foregroundColor(.secondary)
                         }
-                    } else {
-                        Text("No qualifying workouts found.")
-                            .foregroundColor(.secondary)
                     }
                 }
             }
+            .padding()
+            .background(Color.white.opacity(0.1))
+            .cornerRadius(16)
+            .shadow(radius: 5)
+            .onAppear {
+                viewModel.fetchQualifyingWorkouts()
+            }
         }
-        .padding()
-        .background(Color.white.opacity(0.1))
-        .cornerRadius(16)
-        .shadow(radius: 5)
-        .onAppear {
-            viewModel.fetchQualifyingWorkouts()
-        }
-    }
 
     // Dynamically calculate the number of columns and adjust the size of the squares
     private func workoutProgressGrid(for userEmail: String) -> some View {
@@ -244,10 +249,10 @@ class ContestTrackingViewModel: ObservableObject {
 
         let workoutsRef = db.collection("workouts")
         let group = DispatchGroup()
-        
+
         for userEmail in contest.members {
             group.enter()
-            
+
             // Fetch the user ID for the email
             db.collection("users").whereField("email", isEqualTo: userEmail).getDocuments { [weak self] (userSnapshot, userError) in
                 guard let self = self, let userDoc = userSnapshot?.documents.first else {
@@ -255,59 +260,68 @@ class ContestTrackingViewModel: ObservableObject {
                     group.leave()
                     return
                 }
-                
+
                 let userId = userDoc.documentID
                 
+                // Fetch workouts for this user that match contest parameters
                 workoutsRef
                     .whereField("userId", isEqualTo: userId)
-                    .whereField("type", isEqualTo: 37) // Assuming 37 corresponds to "Running"
                     .whereField("date", isGreaterThanOrEqualTo: self.contest.startDate)
                     .whereField("date", isLessThanOrEqualTo: self.contest.endDate)
-                    .getDocuments { [weak self] snapshot, error in
+                    .getDocuments { (snapshot, error) in
                         defer { group.leave() }
-                        guard let self = self else { return }
                         
                         if let error = error {
                             print("Error fetching workouts for user \(userId): \(error.localizedDescription)")
                             return
                         }
                         
-                        if let snapshot = snapshot {
-                            let qualifyingWorkouts = snapshot.documents.filter { document in
-                                guard let distance = document.data()["distance"] as? Double,
-                                      let pace = document.data()["pace"] as? Double else {
-                                    return false
-                                }
-                                
-                                let paceInMinutes = pace / 60.0
-                                return distance >= self.contest.distance && paceInMinutes <= self.contest.pace
-                            }
+                        guard let snapshot = snapshot else {
+                            print("No workouts found for user \(userId)")
+                            return
+                        }
 
-                            // Count qualifying workouts
-                            DispatchQueue.main.async {
-                                self.qualifyingWorkouts[userEmail] = qualifyingWorkouts.count
+                        // Now you can filter the snapshot documents
+                        let qualifyingWorkouts = snapshot.documents.filter { document in
+                            guard let distance = document.data()["distance"] as? Double,
+                                  let pace = document.data()["pace"] as? Double else {
+                                print("Workout data is missing distance or pace")
+                                return false
                             }
                             
-                            // Add detailed workouts for each qualifying workout
+                            let paceInMinutes = pace / 60.0
+                            let isDistanceValid = distance >= self.contest.distance
+                            let isPaceValid = paceInMinutes <= self.contest.pace
+                            
+                            print("Checking workout: Distance=\(distance), Pace=\(paceInMinutes)")
+                            print("Contest requirements: Distance=\(self.contest.distance), Pace=\(self.contest.pace)")
+                            
+                            return isDistanceValid && isPaceValid
+                        }
+
+                        // Update qualifying workout counts
+                        DispatchQueue.main.async {
+                            self.qualifyingWorkouts[userEmail] = qualifyingWorkouts.count
+
+                            // For each qualifying workout, create a DetailedWorkout and append it to detailedWorkouts
                             for document in qualifyingWorkouts {
-                                if let detailedWorkout = self.createDetailedWorkout(from: document, for: userEmail) {  // Pass userEmail
-                                    DispatchQueue.main.async {
-                                        self.detailedWorkouts.append(detailedWorkout)
-                                        // Sort by date in reverse order
-                                        self.detailedWorkouts.sort { $0.date > $1.date }
-                                    }
+                                if let detailedWorkout = self.createDetailedWorkout(from: document, for: userEmail) {
+                                    self.detailedWorkouts.append(detailedWorkout)
                                 }
                             }
                         }
                     }
             }
         }
-        
+
         group.notify(queue: .main) { [weak self] in
             guard let self = self else { return }
             self.isLoading = false
         }
     }
+
+
+
 
 
     private func createDetailedWorkout(from document: DocumentSnapshot, for userEmail: String) -> DetailedWorkout? {

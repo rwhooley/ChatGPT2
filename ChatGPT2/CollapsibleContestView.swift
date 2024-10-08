@@ -16,6 +16,7 @@ struct CollapsibleContestRow: View {
     @State private var isProcessing = false  // To handle invest button state
     @State private var userHasInvested = false  // Track if the user has already invested
     @State private var showCancelConfirmation = false // To show the confirmation dialog
+    @State private var showInsufficientBalanceAlert = false
     @Binding var contests: [Contest]
     
     var declineAction: () -> Void
@@ -31,6 +32,33 @@ struct CollapsibleContestRow: View {
                 expandedContent
             }
         }
+        .alert(isPresented: Binding<Bool>(
+            get: { showInsufficientBalanceAlert || showCancelConfirmation },
+            set: { _ in }
+        )) {
+            if showInsufficientBalanceAlert {
+                return Alert(
+                    title: Text("Insufficient Free Balance"),
+                    message: Text("You don't have enough free balance to invest. Please make a deposit to proceed."),
+                    dismissButton: .default(Text("OK")) {
+                        showInsufficientBalanceAlert = false  // Reset the state
+                    }
+                )
+            } else if showCancelConfirmation {
+                return Alert(
+                    title: Text("Are you sure?"),
+                    message: Text("Are you sure you want to cancel this contest? All funds will be returned to participants."),
+                    primaryButton: .destructive(Text("Cancel Contest")) {
+                        cancelContest()
+                    },
+                    secondaryButton: .cancel(Text("Go Back")) {
+                        showCancelConfirmation = false  // Reset the state
+                    }
+                )
+            } else {
+                return Alert(title: Text("Error"))  // Fallback alert (in case none match)
+            }
+        }
         .onAppear {
             fetchCreatorEmail(userId: contest.createdBy ?? "")
             
@@ -39,26 +67,16 @@ struct CollapsibleContestRow: View {
                 self.userHasInvested = hasInvested
             }
         }
-        .alert(isPresented: $showCancelConfirmation) {
-                    Alert(
-                        title: Text("Are you sure?"),
-                        message: Text("Are you sure you want to cancel this contest? All funds will be returned to participants."),
-                        primaryButton: .destructive(Text("Cancel Contest")) {
-                            cancelContest() // If confirmed, cancel the contest
-                        },
-                        secondaryButton: .cancel(Text("Go Back"))
-                    )
-                }
         .padding()
         .background(RoundedRectangle(cornerRadius: 15)
             .fill(contest.status == "Pending" ? Color.yellow.opacity(0.1) : Color.green.opacity(0.1))
             .shadow(color: Color.gray.opacity(0.2), radius: 5, x: 0, y: 2))
-        .overlay(
+        .overlay(   
             RoundedRectangle(cornerRadius: 15)
                 .stroke(contest.status == "Pending" ? Color.yellow.opacity(0.3) : Color.green.opacity(0.3), lineWidth: 1)
         )
     }
-    
+
     private var contestHeader: some View {
         HStack {
             Text(contest.contestName)  // Ensure this is a non-optional field in the Contest model
@@ -289,12 +307,10 @@ struct CollapsibleContestRow: View {
                         let updatedFreeBalance = freeBalance - investmentAmount
                         let updatedInvestedBalance = investedBalance + investmentAmount
                         let updatedInvestedParticipants = currentInvestedParticipants + 1
-                        let updatedTotalPot = totalPot + investmentAmount
 
                         // Update investedParticipants and totalPot in the contest
                         transaction.updateData([
                             "investedParticipants": updatedInvestedParticipants,
-                            "totalPot": updatedTotalPot
                         ], forDocument: contestRef)
                         
                         // Update user's freeBalance and investedBalance
@@ -329,7 +345,9 @@ struct CollapsibleContestRow: View {
                         self.isProcessing = false // Re-enable the button after completion
                     }
                 } else {
+                    // If balance is insufficient, show the alert
                     print("Insufficient free balance to invest")
+                    self.showInsufficientBalanceAlert = true  // Trigger the alert state
                     self.isProcessing = false // Re-enable the button if balance is insufficient
                 }
 
@@ -339,6 +357,7 @@ struct CollapsibleContestRow: View {
             }
         }
     }
+
 
 
 

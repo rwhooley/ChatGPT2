@@ -174,6 +174,7 @@ struct HomeContestsView: View {
         .cornerRadius(12)
     }
 
+
     private func pendingContestCard(for contest: Contest) -> some View {
         CollapsibleContestRow(contest: contest, contests: $viewModel.pendingContests) {
             Task { await viewModel.declineContest(contest) }

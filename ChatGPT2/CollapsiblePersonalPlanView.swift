@@ -48,9 +48,11 @@ struct CollapsiblePersonalPlanView: View {
     
     private var expandedContent: some View {
         VStack(alignment: .leading, spacing: 8) {
-            infoRow(title: "Month", value: personalPlan.month)
             infoRow(title: "Amount", value: formatCurrency(personalPlan.amount))
-            infoRow(title: "Timestamp", value: formatDate(personalPlan.timestamp))
+            infoRow(title: "Bonus Rate", value: "\(personalPlan.bonusRate)%")
+            infoRow(title: "Bonus Workouts", value: "\(personalPlan.bonusSquares)")
+            infoRow(title: "Workout Count", value: "\(personalPlan.workoutCount)")
+            infoRow(title: "Month", value: personalPlan.month)
         }
         .font(.subheadline)
     }
@@ -64,14 +66,6 @@ struct CollapsiblePersonalPlanView: View {
                 .foregroundColor(.primary)
         }
     }
-
-    private func formatDate(_ date: Date?) -> String {
-        guard let date = date else { return "N/A" }
-        let formatter = DateFormatter()
-        formatter.dateStyle = .medium
-        formatter.timeStyle = .none
-        return formatter.string(from: date)
-    }
     
     private func formatCurrency(_ amount: Double) -> String {
         let formatter = NumberFormatter()
@@ -81,11 +75,18 @@ struct CollapsiblePersonalPlanView: View {
     }
 }
 
+
+
+
 // Model representing a personal investment plan
 struct PersonalPlan: Identifiable {
     let id: String
     let amount: Double
+    let bonusRate: Double
+    let bonusSquares: Int
+    let workoutCount: Int
     let month: String
     let timestamp: Date
     let userId: String
 }
+

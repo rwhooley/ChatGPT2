@@ -228,6 +228,9 @@ struct HomeView: View {
                     return PersonalPlan(
                         id: document.documentID,
                         amount: data["amount"] as? Double ?? 0,
+                        bonusRate: data["bonusRate"] as? Double ?? 0, // New field
+                        bonusSquares: data["bonusSquares"] as? Int ?? 0, // New field
+                        workoutCount: data["workoutCount"] as? Int ?? 0, // New field
                         month: data["month"] as? String ?? "",
                         timestamp: (data["timestamp"] as? Timestamp)?.dateValue() ?? Date(),
                         userId: data["userId"] as? String ?? ""
@@ -235,6 +238,7 @@ struct HomeView: View {
                 } ?? []
             }
     }
+
    
     
     private func fetchUserFirstName() {

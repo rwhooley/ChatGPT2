@@ -22,15 +22,6 @@ struct HomePersonalView: View {
     @State private var currentMonthInvestments: [Investment] = []
     @State private var qualifyingWorkoutsCount: Int = 0
     @State private var isLoading = true
-
-
-//    private var shouldUpdateQualifyingWorkouts: Bool {
-//            // This computed property will be called whenever the view updates
-//            updateQualifyingWorkoutsCount()
-//            return updateTrigger
-//        }
-    
-    
     
     private var completedSquares: Int {
            min(qualifyingWorkoutsCount, currentMonthInvestment?.workoutCount ?? 0)
@@ -52,15 +43,11 @@ struct HomePersonalView: View {
     
     let columns = Array(repeating: GridItem(.flexible(), spacing: 10), count: 4)
     
-    
-    
     var currentMonthYear: String {
         let formatter = DateFormatter()
         formatter.dateFormat = "MMMM yyyy"
         return formatter.string(from: Date())
     }
-    
-    
     
     var body: some View {
             VStack(alignment: .leading, spacing: 20) {
@@ -83,10 +70,13 @@ struct HomePersonalView: View {
                         VStack(alignment: .leading, spacing: 0) {
                             CollapsiblePersonalPlanView(personalPlan: PersonalPlan(
                                 id: investment.id,
-                                amount: investment.amount,
-                                month: investment.month ?? "Unknown",
-                                timestamp: investment.timestamp ?? Date(),
-                                userId: investment.userId ?? ""
+                                   amount: investment.amount,
+                                   bonusRate: investment.bonusRate,
+                                   bonusSquares: investment.bonusSquares,
+                                   workoutCount: investment.workoutCount,
+                                   month: investment.month ?? "Unknown",
+                                   timestamp: investment.timestamp ?? Date(),
+                                   userId: investment.userId ?? ""
                             ))
                             .padding(.horizontal)
                             .padding(.vertical, 12)
@@ -229,9 +219,16 @@ struct HomePersonalView: View {
                         .font(.subheadline)
                         .foregroundColor(.gray)
                     Spacer()
-                    Text("$\(Int(totalEarnedAmount(for: investment)))")
-                        .font(.title3)
-                        .fontWeight(.bold)
+                    let totalEarned = totalEarnedAmount(for: investment)
+                    if !totalEarned.isNaN && !totalEarned.isInfinite {
+                        Text("$\(Int(totalEarned))")
+                            .font(.title3)
+                            .fontWeight(.bold)
+                    } else {
+                        Text("$0")
+                            .font(.title3)
+                            .fontWeight(.bold)
+                    }
                 }
                 .frame(maxWidth: .infinity, minHeight: 50)
                 .padding()
@@ -242,14 +239,22 @@ struct HomePersonalView: View {
                         .font(.subheadline)
                         .foregroundColor(.gray)
                     Spacer()
-                    Text("$\(Int(possibleAmount(for: investment)))")
-                        .font(.title3)
-                        .fontWeight(.bold)
+                    let possible = possibleAmount(for: investment)
+                    if !possible.isNaN && !possible.isInfinite {
+                        Text("$\(Int(possible))")
+                            .font(.title3)
+                            .fontWeight(.bold)
+                    } else {
+                        Text("$0")
+                            .font(.title3)
+                            .fontWeight(.bold)
+                    }
                 }
                 .frame(maxWidth: .infinity, minHeight: 50)
                 .padding()
                 .background(RoundedRectangle(cornerRadius: 10).fill(Color.gray.opacity(0.2)))
             }
+
         }
     }
 

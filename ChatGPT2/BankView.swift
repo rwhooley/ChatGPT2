@@ -254,14 +254,17 @@ struct BankView: View {
                                    .fontWeight(.medium)
                                ForEach(viewModel.activePersonalInvestments) { investment in
                                    CollapsiblePersonalPlanView(personalPlan: PersonalPlan(
-                                       id: investment.id,
+                                    id: investment.id,
                                        amount: investment.amount,
+                                       bonusRate: investment.bonusRate,
+                                       bonusSquares: investment.bonusSquares,
+                                       workoutCount: investment.workoutCount,
                                        month: investment.month ?? "Unknown",
                                        timestamp: investment.timestamp ?? Date(),
                                        userId: investment.userId ?? ""
                                    ))
-                                   .padding(.vertical, 4)
                                }
+
                            }
 
                         if !viewModel.activeContestInvestments.isEmpty {
@@ -593,7 +596,6 @@ struct BankView: View {
             case .success(let url):
                 DispatchQueue.main.async {
                     self.safariURL = url
-                    // Add a short delay to ensure the sheet triggers correctly
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
                         self.showingSafari = true
                     }
@@ -606,6 +608,7 @@ struct BankView: View {
             }
         }
     }
+
 
 
 

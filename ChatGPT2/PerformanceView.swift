@@ -398,7 +398,7 @@ struct WorkoutRow: View {
                         .frame(width: 50, height: 50)
                         .foregroundColor(.gray)
                 }
-                
+
                 VStack(alignment: .leading) {
                     Text("\(workout.userFirstName) \(workout.userLastName)")
                         .font(.headline)
@@ -407,14 +407,14 @@ struct WorkoutRow: View {
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                 }
-                
+
                 Spacer()
-                
+
                 Text(formatDate(workout.date))
                     .font(.caption)
                     .foregroundColor(.secondary)
             }
-            
+
             // Workout Details
             VStack(alignment: .leading, spacing: 4) {
                 HStack {
@@ -423,14 +423,14 @@ struct WorkoutRow: View {
                     Text("\(String(format: "%.2f", workout.distance / 1609.34)) miles")
                         .foregroundColor(.blue)
                 }
-                
+
                 HStack {
                     Text("Duration:")
                         .fontWeight(.bold)
                     Text(formatDuration(workout.duration))
                         .foregroundColor(.blue)
                 }
-                
+
                 if let pace = workout.pace, workout.distance > 0 {
                     HStack {
                         Text("Average Pace:")
@@ -440,14 +440,12 @@ struct WorkoutRow: View {
                     }
                 }
 
-             
-                    HStack {
-                        Text("Calories Burned:")
-                            .fontWeight(.bold)
-                        Text("\(Int(workout.calories)) kcal")
-                            .foregroundColor(.blue)
-                    }
-                
+                HStack {
+                    Text("Calories Burned:")
+                        .fontWeight(.bold)
+                    Text("\(Int(workout.calories)) kcal")
+                        .foregroundColor(.blue)
+                }
 
                 if let steps = workout.stepsCount {
                     HStack {
@@ -457,7 +455,7 @@ struct WorkoutRow: View {
                             .foregroundColor(.blue)
                     }
                 }
-                
+
                 if let avgHeartRate = workout.averageHeartRate {
                     HStack {
                         Text("Avg Heart Rate:")
@@ -466,7 +464,7 @@ struct WorkoutRow: View {
                             .foregroundColor(.blue)
                     }
                 }
-                
+
                 if let maxHeartRate = workout.maxHeartRate {
                     HStack {
                         Text("Max Heart Rate:")
@@ -481,6 +479,16 @@ struct WorkoutRow: View {
                         Text("Weather:")
                             .fontWeight(.bold)
                         Text(weather)
+                            .foregroundColor(.blue)
+                    }
+                }
+
+                // Displaying the source of the workout
+                if let sourceName = workout.sourceName {
+                    HStack {
+                        Text("Source:")
+                            .fontWeight(.bold)
+                        Text(sourceName)
                             .foregroundColor(.blue)
                     }
                 }
@@ -511,6 +519,7 @@ struct WorkoutRow: View {
         .padding(.vertical, 5)
     }
 }
+
 
 
     private func workoutTypeName(_ type: HKWorkoutActivityType) -> String {

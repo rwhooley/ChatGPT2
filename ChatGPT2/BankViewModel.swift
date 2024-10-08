@@ -45,12 +45,8 @@ class BankViewModel: ObservableObject {
     @Published var activeContestInvestments: [Contest] = [] // For active contests
     @Published var activeTeamInvestments: [Team] = []
     @Published var activePersonalInvestments: [Investment] = []
-    
     @StateObject private var viewModel = BankViewModel()
 
-    
-    
-    
     private var contestCache: [String: Contest] = [:]
       
     
@@ -1075,38 +1071,6 @@ class BankViewModel: ObservableObject {
             }
         }
     }
-    
-//    func getContestName(for contestId: String) -> String {
-//        if let cachedName = contestNames[contestId] {
-//            return cachedName
-//        } else {
-//            // Temporarily set a placeholder value in contestNames to trigger a re-render
-//            contestNames[contestId] = "Loading..."
-//            
-//            // Fetch contest name from Firestore asynchronously
-//            let contestRef = Firestore.firestore().collection("contests").document(contestId)
-//            contestRef.getDocument { document, error in
-//                if let error = error {
-//                    print("Error fetching contest name: \(error)")
-//                    self.contestNames[contestId] = "Unknown Contest"
-//                    return
-//                }
-//                
-//                if let contestData = document?.data(),
-//                   let contestName = contestData["name"] as? String {
-//                    DispatchQueue.main.async {
-//                        self.contestNames[contestId] = contestName
-//                    }
-//                } else {
-//                    DispatchQueue.main.async {
-//                        self.contestNames[contestId] = "Unknown Contest"
-//                    }
-//                }
-//            }
-//            
-//            return contestNames[contestId] ?? "Unknown Contest" // Return placeholder or final result
-//        }
-//    }
 
 }
 
